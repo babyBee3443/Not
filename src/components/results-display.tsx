@@ -36,7 +36,7 @@ export function ResultsDisplay({ results, isLoading, turkishInput }: ResultsDisp
   // by React, allowing the animation classes to re-apply.
   return (
     <div 
-      className="space-y-6 mt-8 animate-in fade-in slide-in-from-bottom-10 duration-500 ease-out"
+      className="space-y-6 mt-8 animate-in fade-in slide-in-from-bottom-10 scale-in-95 duration-500 ease-out"
       key={turkishInput || 'initial-results-display'} 
     >
       <h2 className="text-2xl font-bold text-primary mb-4">Results</h2>
