@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -11,7 +12,6 @@ interface ResultsDisplayProps {
 }
 
 export function ResultsDisplay({ results, isLoading, turkishInput }: ResultsDisplayProps) {
-  // Full block skeletons for initial load (isLoading is true AND no previous results exist)
   if (isLoading && !results) {
     return (
       <div className="space-y-6 mt-8">
@@ -25,15 +25,10 @@ export function ResultsDisplay({ results, isLoading, turkishInput }: ResultsDisp
     );
   }
 
-  // If not loading and no results are available (e.g., initial state before any submission)
   if (!isLoading && !results) {
-    return null; // Or a placeholder message like "Enter a term or sentence above to see results."
+    return null; 
   }
   
-  // If results are available (even if isLoading is true for a refresh, individual ResultItems will handle their pulse)
-  // Animate the container when new results are displayed.
-  // The `key` prop ensures that when `turkishInput` changes, this component/div is treated as "new"
-  // by React, allowing the animation classes to re-apply.
   return (
     <div 
       className="space-y-6 mt-8 animate-in fade-in slide-in-from-bottom-10 scale-in-95 duration-500 ease-out"
@@ -45,7 +40,7 @@ export function ResultsDisplay({ results, isLoading, turkishInput }: ResultsDisp
         <ResultItem 
           title="Original Input (Turkish)" 
           content={turkishInput} 
-          isLoading={isLoading && (!results || !results.englishTerm)} // Show skeleton if overall loading and specific dependent data not ready
+          isLoading={isLoading && (!results || !results.englishTerm)} 
         />
       )}
       
@@ -54,21 +49,25 @@ export function ResultsDisplay({ results, isLoading, turkishInput }: ResultsDisp
         content={results?.englishTerm} 
         isLoading={isLoading && (!results || !results.englishTerm)} 
         isTerm={true} 
+        turkishEquivalent={results?.englishTerm ? turkishInput : undefined}
       />
       <ResultItem 
         title="Full English Translation" 
         content={results?.englishSentence} 
         isLoading={isLoading && (!results || !results.englishSentence)} 
+        turkishEquivalent={results?.englishSentence ? turkishInput : undefined}
       />
       <ResultItem 
         title="Definition" 
         content={results?.definition} 
         isLoading={isLoading && (!results || !results.definition)} 
+        turkishEquivalent={results?.definition ? turkishInput : undefined}
       />
       <ResultItem 
         title="Explanation" 
         content={results?.explanation} 
         isLoading={isLoading && (!results || !results.explanation)} 
+        turkishEquivalent={results?.explanation ? turkishInput : undefined}
       />
     </div>
   );
