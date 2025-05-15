@@ -54,18 +54,25 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false }
     };
     utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
       console.error("Speech synthesis error. Code:", event.error, "Content length:", content?.length);
-      toast({ title: "Speech Error", description: "Could not play audio.", variant: "destructive" });
+      // Only show toast for errors other than 'interrupted'
+      if (event.error !== 'interrupted') {
+        toast({ title: "Speech Error", description: "Could not play audio.", variant: "destructive" });
+      }
       setIsSpeaking(false);
     };
     
     speechSynthesis.speak(utterance);
   };
 
-  // Effect to ensure speaking state is reset if component unmounts or content changes while speaking
+  // Effect to ensure speaking state is reset if component unmounts
   useEffect(() => {
     return () => {
-      // Cleanup logic can be added here if needed, e.g., specifically for utterances tied to this component instance.
-      // However, the global cancel in handleSpeak and the effect below for content changes cover many cases.
+      if (isSpeaking && typeof window !== 'undefined' && window.speechSynthesis) {
+        // Check if the current component's utterance is the one speaking, though this is hard to do reliably.
+        // Generally, cancelling all speech on unmount if this component was 'active' can be a strategy,
+        // but might be too broad if speech is meant to persist.
+        // For now, relying on explicit stop/cancellation logic in handleSpeak and content change.
+      }
     };
   }, [isSpeaking]); 
   
