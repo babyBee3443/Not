@@ -7,17 +7,13 @@ import {
   SidebarFooter,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarMenuBadge,
-  SidebarGroup,
-  SidebarGroupLabel,
-} from '@/components/ui/sidebar';
+} from '@/components/ui/sidebar'; // Removed unused Sidebar components
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { HistoryEntry } from '@/lib/types';
 import { Star, Trash2, Clock, Heart } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { Badge } from '@/components/ui/badge'; // Badge was not used
 
 interface HistorySidebarProps {
   history: HistoryEntry[];
@@ -39,9 +35,9 @@ export function HistorySidebar({
   
   const favoriteEntries = history.filter(item => favorites.includes(item.id));
 
-  const renderHistoryItem = (item: HistoryEntry, isFavoriteList: boolean = false) => (
+  const renderHistoryItem = (item: HistoryEntry, _isFavoriteList: boolean = false) => ( // _isFavoriteList not used
     <SidebarMenuItem key={item.id} className="group/menu-item">
-      <div className="flex w-full items-center justify-between p-2 rounded-md hover:bg-sidebar-accent transition-colors">
+      <div className="flex w-full items-center justify-between p-2 rounded-lg hover:bg-sidebar-accent transition-colors"> {/* Changed to rounded-lg */}
         <button
           onClick={() => onSelectHistoryItem(item)}
           className="flex-grow text-left truncate"
