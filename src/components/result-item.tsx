@@ -41,12 +41,8 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false }
         return;
       }
       // If another item was speaking, it's now cancelled. We'll proceed to speak this one.
-      // We might need a brief delay for the previous onend to fire on other components.
-      // However, SpeechSynthesisUtterance's onend should handle setting isSpeaking to false
-      // for the item that was just cancelled.
     }
     
-    // If current item was not speaking, or if nothing was speaking, start speaking this item.
     const utterance = new SpeechSynthesisUtterance(content);
     utterance.lang = 'en-US'; // Specify English
     
@@ -56,8 +52,8 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false }
     utterance.onend = () => {
       setIsSpeaking(false);
     };
-    utterance.onerror = (event) => {
-      console.error("Speech synthesis error", event);
+    utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
+      console.error("Speech synthesis error. Code:", event.error, "Content length:", content?.length);
       toast({ title: "Speech Error", description: "Could not play audio.", variant: "destructive" });
       setIsSpeaking(false);
     };
@@ -68,15 +64,10 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false }
   // Effect to ensure speaking state is reset if component unmounts or content changes while speaking
   useEffect(() => {
     return () => {
-      if (isSpeaking && typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.speaking) {
-        // A bit aggressive, but if the component tied to this state is unmounting/changing and was speaking,
-        // it's safer to stop all speech to prevent orphaned audio.
-        // Ideally, we'd only stop the utterance associated with THIS component instance,
-        // but utterances aren't directly tied to components.
-        // This is often handled by `speechSynthesis.cancel()` in `handleSpeak` of the *next* item.
-      }
+      // Cleanup logic can be added here if needed, e.g., specifically for utterances tied to this component instance.
+      // However, the global cancel in handleSpeak and the effect below for content changes cover many cases.
     };
-  }, [isSpeaking]);
+  }, [isSpeaking]); 
   
   // If content changes, and this item was speaking, stop it.
   useEffect(() => {
