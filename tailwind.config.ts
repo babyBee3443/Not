@@ -22,6 +22,7 @@ export default {
   			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
+          end: 'hsl(var(--primary-end))',
   				foreground: 'hsl(var(--primary-foreground))'
   			},
   			secondary: {
@@ -52,6 +53,7 @@ export default {
   			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
+          end: 'hsl(var(--sidebar-background-end))',
   				foreground: 'hsl(var(--sidebar-foreground))',
   				primary: 'hsl(var(--sidebar-primary))',
   				'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',

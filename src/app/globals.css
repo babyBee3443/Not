@@ -18,6 +18,7 @@ body {
     --popover-foreground: 220 15% 35%;
 
     --primary: 210 80% 60%; /* Soft, friendly blue */
+    --primary-end: 210 80% 65%; /* Slightly brighter blue for gradient */
     --primary-foreground: 210 80% 98%; /* Very light text on primary */
 
     --secondary: 210 60% 94%; /* Lighter, softer blue */
@@ -46,6 +47,7 @@ body {
 
     /* Sidebar specific colors - derived from main theme for softness */
     --sidebar-background: 210 70% 96%; /* Very light soft blue, slightly different from main bg */
+    --sidebar-background-end: 210 70% 98%; /* Slightly lighter for gradient */
     --sidebar-foreground: 220 15% 35%;
     --sidebar-primary: 210 80% 55%; /* Slightly more saturated for emphasis */
     --sidebar-primary-foreground: 210 80% 98%;
@@ -66,6 +68,7 @@ body {
     --popover-foreground: 220 20% 85%;
 
     --primary: 210 70% 55%; /* Muted, but still distinct blue */
+    --primary-end: 210 70% 60%; /* Slightly brighter blue for gradient */
     --primary-foreground: 210 70% 95%; /* Light text on primary */
 
     --secondary: 220 30% 20%; /* Darker secondary */
@@ -86,6 +89,7 @@ body {
 
     /* Sidebar specific colors for dark theme */
     --sidebar-background: 220 30% 10%; /* Slightly darker than main bg */
+    --sidebar-background-end: 220 30% 12%; /* Slightly lighter for gradient */
     --sidebar-foreground: 220 20% 85%;
     --sidebar-primary: 210 70% 60%;
     --sidebar-primary-foreground: 210 70% 95%;
