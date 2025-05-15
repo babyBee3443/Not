@@ -9,15 +9,15 @@ import { ActivityItemCard } from '@/components/activity-item-card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from '@/components/ui/input'; // Import Input component
 import { useToast } from '@/hooks/use-toast';
 import useLocalStorage from '@/hooks/use-local-storage';
 import type { AIResults, HistoryEntry, ExplanationMode } from '@/lib/types';
 import { translateSentence } from '@/ai/flows/translate-sentence';
 import { translateTerm } from '@/ai/flows/translate-term';
 import { explainTerm } from '@/ai/flows/explain-term';
-import { History as HistoryIcon, Star, Trash2, Languages } from 'lucide-react'; // Renamed History to HistoryIcon
+import { History as HistoryIcon, Star, Trash2, Languages, Search } from 'lucide-react';
 
-// Using Math.random for pseudo-unique IDs as uuid isn't available in this environment.
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
 export default function BioLinguaLearnPage() {
@@ -30,6 +30,8 @@ export default function BioLinguaLearnPage() {
   const [lastMode, setLastMode] = useLocalStorage<ExplanationMode>('bioLinguaLastMode', 'Beginner');
   const [activeTab, setActiveTab] = useState<string>("translate");
 
+  const [historySearchTerm, setHistorySearchTerm] = useState('');
+  const [favoritesSearchTerm, setFavoritesSearchTerm] = useState('');
 
   const { toast } = useToast();
 
@@ -65,9 +67,6 @@ export default function BioLinguaLearnPage() {
       
       if (explanationRes.status === 'fulfilled') {
         results.explanation = explanationRes.value.explanation;
-        // if (!results.englishTerm && explanationRes.value.englishTerm) {
-           // results.englishTerm = explanationRes.value.englishTerm; 
-        // }
       } else {
         console.error("Error explaining term:", explanationRes.reason);
         toast({ title: "Error", description: "Failed to explain term.", variant: "destructive" });
@@ -96,7 +95,7 @@ export default function BioLinguaLearnPage() {
   const handleSelectHistoryItem = (item: HistoryEntry) => {
     setCurrentInput({ turkishInput: item.turkishInput, mode: item.mode });
     setCurrentResults(item.results);
-    setActiveTab("translate"); // Switch to translate tab
+    setActiveTab("translate"); 
     window.scrollTo({ top: 0, behavior: 'smooth' }); 
   };
 
@@ -111,15 +110,25 @@ export default function BioLinguaLearnPage() {
   const handleClearHistory = () => {
     setHistory([]);
     setFavorites(prevFavorites => prevFavorites.filter(favId => !history.find(h => h.id === favId)));
+    setHistorySearchTerm(''); // Clear search on history clear
     toast({ title: "History Cleared" });
   };
   
   const handleClearFavorites = () => {
     setFavorites([]);
+    setFavoritesSearchTerm(''); // Clear search on favorites clear
     toast({ title: "Favorites Cleared" });
   };
 
   const favoriteEntries = history.filter(item => favorites.includes(item.id));
+
+  const filteredHistory = history.filter(item => 
+    item.turkishInput.toLowerCase().includes(historySearchTerm.toLowerCase())
+  );
+
+  const filteredFavorites = favoriteEntries.filter(item =>
+    item.turkishInput.toLowerCase().includes(favoritesSearchTerm.toLowerCase())
+  );
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
@@ -153,23 +162,37 @@ export default function BioLinguaLearnPage() {
 
             <TabsContent value="history">
               <div className="space-y-4">
-                {history.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClearHistory}
-                    className="w-full sm:w-auto"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Clear History
-                  </Button>
-                )}
+                <div className="flex flex-col sm:flex-row gap-2 items-center">
+                  <div className="relative w-full sm:flex-grow">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="text"
+                      placeholder="Search history..."
+                      value={historySearchTerm}
+                      onChange={(e) => setHistorySearchTerm(e.target.value)}
+                      className="pl-8 w-full"
+                    />
+                  </div>
+                  {history.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleClearHistory}
+                      className="w-full sm:w-auto flex-shrink-0"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Clear History
+                    </Button>
+                  )}
+                </div>
                 <ScrollArea className="h-[400px] pr-3 border rounded-md">
                   {history.length === 0 ? (
                     <p className="p-4 text-center text-sm text-muted-foreground">No history yet.</p>
+                  ) : filteredHistory.length === 0 ? (
+                    <p className="p-4 text-center text-sm text-muted-foreground">No matching history entries found.</p>
                   ) : (
                     <div className="p-2 space-y-2">
-                      {history.map(item => (
+                      {filteredHistory.map(item => (
                         <ActivityItemCard
                           key={item.id}
                           item={item}
@@ -186,23 +209,37 @@ export default function BioLinguaLearnPage() {
 
             <TabsContent value="favorites">
               <div className="space-y-4">
-                {favoriteEntries.length > 0 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleClearFavorites}
-                    className="w-full sm:w-auto"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Clear Favorites
-                  </Button>
-                )}
+                 <div className="flex flex-col sm:flex-row gap-2 items-center">
+                    <div className="relative w-full sm:flex-grow">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="text"
+                        placeholder="Search favorites..."
+                        value={favoritesSearchTerm}
+                        onChange={(e) => setFavoritesSearchTerm(e.target.value)}
+                        className="pl-8 w-full"
+                      />
+                    </div>
+                  {favoriteEntries.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleClearFavorites}
+                      className="w-full sm:w-auto flex-shrink-0"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Clear Favorites
+                    </Button>
+                  )}
+                </div>
                 <ScrollArea className="h-[400px] pr-3 border rounded-md">
                   {favoriteEntries.length === 0 ? (
                     <p className="p-4 text-center text-sm text-muted-foreground">No favorites yet.</p>
+                  ) : filteredFavorites.length === 0 ? (
+                     <p className="p-4 text-center text-sm text-muted-foreground">No matching favorite entries found.</p>
                   ) : (
                      <div className="p-2 space-y-2">
-                      {favoriteEntries.map(item => (
+                      {filteredFavorites.map(item => (
                         <ActivityItemCard
                           key={item.id}
                           item={item}
@@ -222,5 +259,3 @@ export default function BioLinguaLearnPage() {
     </div>
   );
 }
-
-    
