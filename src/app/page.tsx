@@ -1,24 +1,24 @@
+
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AppHeader } from '@/components/app-header';
 import { InputForm, type InputFormValues } from '@/components/input-form';
 import { ResultsDisplay } from '@/components/results-display';
-import { HistorySidebar } from '@/components/history-sidebar';
-import { SidebarInset } from '@/components/ui/sidebar';
+import { ActivityItemCard } from '@/components/activity-item-card';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import useLocalStorage from '@/hooks/use-local-storage';
 import type { AIResults, HistoryEntry, ExplanationMode } from '@/lib/types';
 import { translateSentence } from '@/ai/flows/translate-sentence';
 import { translateTerm } from '@/ai/flows/translate-term';
 import { explainTerm } from '@/ai/flows/explain-term';
-import { v4 as uuidv4 } from 'uuid'; // For generating unique IDs
+import { History, Star, Trash2, ChevronDown } from 'lucide-react';
 
-// Install uuid: npm install uuid @types/uuid
-// Since we cannot modify package.json, we'll use Math.random for pseudo-unique IDs
-// A proper solution would be to install uuid. For now, this is a placeholder.
+// Using Math.random for pseudo-unique IDs as uuid isn't available in this environment.
 const generateId = () => Math.random().toString(36).substr(2, 9);
-
 
 export default function BioLinguaLearnPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -28,20 +28,20 @@ export default function BioLinguaLearnPage() {
   const [history, setHistory] = useLocalStorage<HistoryEntry[]>('bioLinguaHistory', []);
   const [favorites, setFavorites] = useLocalStorage<string[]>('bioLinguaFavorites', []);
   const [lastMode, setLastMode] = useLocalStorage<ExplanationMode>('bioLinguaLastMode', 'Beginner');
+  const [activeAccordionItem, setActiveAccordionItem] = useState<string | undefined>(undefined);
 
 
   const { toast } = useToast();
 
   const handleFormSubmit = async (values: InputFormValues) => {
     setIsLoading(true);
-    setCurrentResults(undefined); // Clear previous results
+    setCurrentResults(undefined); 
     setCurrentInput(values);
     setLastMode(values.mode);
 
     try {
       const results: AIResults = {};
       
-      // Parallel execution (optional, can be sequential if preferred or if dependencies exist)
       const [sentenceRes, termRes, explanationRes] = await Promise.allSettled([
         translateSentence({ turkishSentence: values.turkishInput }),
         translateTerm({ turkishTerm: values.turkishInput, mode: values.mode }),
@@ -58,8 +58,6 @@ export default function BioLinguaLearnPage() {
       if (termRes.status === 'fulfilled') {
         results.englishTerm = termRes.value.englishTerm;
         results.definition = termRes.value.definition;
-        // If fullTranslation from translateTerm is desired, it can be added here.
-        // For now, translateSentence handles the full input translation.
       } else {
         console.error("Error translating term:", termRes.reason);
         toast({ title: "Error", description: "Failed to translate term.", variant: "destructive" });
@@ -67,11 +65,8 @@ export default function BioLinguaLearnPage() {
       
       if (explanationRes.status === 'fulfilled') {
         results.explanation = explanationRes.value.explanation;
-        // If explainTerm flow also returns englishTerm, ensure consistency or prioritize one.
-        // Current explainTerm flow returns englishTerm and explanation.
-        // We can use termRes for englishTerm and explanationRes for explanation.
         if (!results.englishTerm && explanationRes.value.englishTerm) {
-           // results.englishTerm = explanationRes.value.englishTerm; // Potentially overwrite if termRes failed but this succeeded
+           // results.englishTerm = explanationRes.value.englishTerm; 
         }
       } else {
         console.error("Error explaining term:", explanationRes.reason);
@@ -80,7 +75,6 @@ export default function BioLinguaLearnPage() {
       
       setCurrentResults(results);
 
-      // Add to history
       const newHistoryEntry: HistoryEntry = {
         id: generateId(),
         timestamp: Date.now(),
@@ -88,12 +82,12 @@ export default function BioLinguaLearnPage() {
         mode: values.mode,
         results,
       };
-      setHistory(prevHistory => [newHistoryEntry, ...prevHistory.slice(0, 49)]); // Keep max 50 items
+      setHistory(prevHistory => [newHistoryEntry, ...prevHistory.slice(0, 49)]);
 
     } catch (error) {
       console.error("AI processing error:", error);
       toast({ title: "Processing Error", description: "An unexpected error occurred.", variant: "destructive" });
-      setCurrentResults({}); // Show empty results or error state
+      setCurrentResults({});
     } finally {
       setIsLoading(false);
     }
@@ -102,11 +96,7 @@ export default function BioLinguaLearnPage() {
   const handleSelectHistoryItem = (item: HistoryEntry) => {
     setCurrentInput({ turkishInput: item.turkishInput, mode: item.mode });
     setCurrentResults(item.results);
-    // Optionally, re-submit form or directly display. For now, direct display.
-    // To re-submit, call handleFormSubmit(item) but that makes another AI call.
-    // It's better to just populate the form and results display.
-    // The InputForm component might need a way to be reset with these values.
-    // For now, we just update results. User can copy from history to form.
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to see the form
   };
 
   const handleToggleFavorite = (itemId: string) => {
@@ -119,7 +109,7 @@ export default function BioLinguaLearnPage() {
 
   const handleClearHistory = () => {
     setHistory([]);
-    setFavorites([]); // Also clear favorites if they are linked to history IDs
+    setFavorites(prevFavorites => prevFavorites.filter(favId => !history.find(h => h.id === favId))); // Keep favorites that might not be in current history view if history was truncated
     toast({ title: "History Cleared" });
   };
   
@@ -128,31 +118,105 @@ export default function BioLinguaLearnPage() {
     toast({ title: "Favorites Cleared" });
   };
 
+  const favoriteEntries = history.filter(item => favorites.includes(item.id));
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <AppHeader />
-      <div className="flex flex-1">
-        <SidebarInset className="flex-1 overflow-auto">
-          <main className="container mx-auto py-8 px-4 md:px-6 lg:px-8">
-            <div className="mx-auto max-w-3xl">
-              <InputForm 
-                onSubmit={handleFormSubmit} 
-                isLoading={isLoading} 
-                defaultValues={{ turkishInput: currentInput?.turkishInput || '', mode: currentInput?.mode || lastMode }}
-              />
-              <ResultsDisplay results={currentResults} isLoading={isLoading} turkishInput={currentInput?.turkishInput} />
-            </div>
-          </main>
-        </SidebarInset>
-        <HistorySidebar
-          history={history}
-          favorites={favorites}
-          onSelectHistoryItem={handleSelectHistoryItem}
-          onToggleFavorite={handleToggleFavorite}
-          onClearHistory={handleClearHistory}
-          onClearFavorites={handleClearFavorites}
-        />
-      </div>
+      <main className="container mx-auto py-8 px-4 md:px-6 lg:px-8 flex-1">
+        <div className="mx-auto max-w-3xl">
+          <InputForm 
+            onSubmit={handleFormSubmit} 
+            isLoading={isLoading} 
+            defaultValues={{ turkishInput: currentInput?.turkishInput || '', mode: currentInput?.mode || lastMode }}
+          />
+          <ResultsDisplay results={currentResults} isLoading={isLoading} turkishInput={currentInput?.turkishInput} />
+
+          <Accordion 
+            type="single" 
+            collapsible 
+            className="w-full mt-12"
+            value={activeAccordionItem}
+            onValueChange={setActiveAccordionItem}
+          >
+            <AccordionItem value="history">
+              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <History className="h-5 w-5 text-primary" />
+                  Translation History
+                  {history.length > 0 && <span className="text-sm font-normal text-muted-foreground">({history.length})</span>}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-2">
+                {history.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearHistory}
+                    className="mb-4"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Clear History
+                  </Button>
+                )}
+                <ScrollArea className="h-[300px] pr-3">
+                  {history.length === 0 ? (
+                    <p className="p-4 text-center text-sm text-muted-foreground">No history yet.</p>
+                  ) : (
+                    history.map(item => (
+                      <ActivityItemCard
+                        key={item.id}
+                        item={item}
+                        isFavorite={favorites.includes(item.id)}
+                        onSelectItem={handleSelectHistoryItem}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    ))
+                  )}
+                </ScrollArea>
+              </AccordionContent>
+            </AccordionItem>
+
+            <AccordionItem value="favorites">
+              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Star className="h-5 w-5 text-primary" />
+                  Favorite Entries
+                  {favoriteEntries.length > 0 && <span className="text-sm font-normal text-muted-foreground">({favoriteEntries.length})</span>}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-2">
+                {favoriteEntries.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleClearFavorites}
+                    className="mb-4"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Clear Favorites
+                  </Button>
+                )}
+                <ScrollArea className="h-[300px] pr-3">
+                  {favoriteEntries.length === 0 ? (
+                    <p className="p-4 text-center text-sm text-muted-foreground">No favorites yet.</p>
+                  ) : (
+                    favoriteEntries.map(item => (
+                      <ActivityItemCard
+                        key={item.id}
+                        item={item}
+                        isFavorite={true} // It's a favorite by definition here
+                        onSelectItem={handleSelectHistoryItem}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    ))
+                  )}
+                </ScrollArea>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      </main>
     </div>
   );
 }
