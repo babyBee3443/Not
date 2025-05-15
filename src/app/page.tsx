@@ -6,16 +6,16 @@ import { AppHeader } from '@/components/app-header';
 import { InputForm, type InputFormValues } from '@/components/input-form';
 import { ResultsDisplay } from '@/components/results-display';
 import { ActivityItemCard } from '@/components/activity-item-card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import useLocalStorage from '@/hooks/use-local-storage';
 import type { AIResults, HistoryEntry, ExplanationMode } from '@/lib/types';
 import { translateSentence } from '@/ai/flows/translate-sentence';
 import { translateTerm } from '@/ai/flows/translate-term';
 import { explainTerm } from '@/ai/flows/explain-term';
-import { History, Star, Trash2, ChevronDown } from 'lucide-react';
+import { History as HistoryIcon, Star, Trash2, Languages } from 'lucide-react'; // Renamed History to HistoryIcon
 
 // Using Math.random for pseudo-unique IDs as uuid isn't available in this environment.
 const generateId = () => Math.random().toString(36).substr(2, 9);
@@ -28,7 +28,7 @@ export default function BioLinguaLearnPage() {
   const [history, setHistory] = useLocalStorage<HistoryEntry[]>('bioLinguaHistory', []);
   const [favorites, setFavorites] = useLocalStorage<string[]>('bioLinguaFavorites', []);
   const [lastMode, setLastMode] = useLocalStorage<ExplanationMode>('bioLinguaLastMode', 'Beginner');
-  const [activeAccordionItem, setActiveAccordionItem] = useState<string | undefined>(undefined);
+  const [activeTab, setActiveTab] = useState<string>("translate");
 
 
   const { toast } = useToast();
@@ -65,9 +65,9 @@ export default function BioLinguaLearnPage() {
       
       if (explanationRes.status === 'fulfilled') {
         results.explanation = explanationRes.value.explanation;
-        if (!results.englishTerm && explanationRes.value.englishTerm) {
+        // if (!results.englishTerm && explanationRes.value.englishTerm) {
            // results.englishTerm = explanationRes.value.englishTerm; 
-        }
+        // }
       } else {
         console.error("Error explaining term:", explanationRes.reason);
         toast({ title: "Error", description: "Failed to explain term.", variant: "destructive" });
@@ -96,7 +96,8 @@ export default function BioLinguaLearnPage() {
   const handleSelectHistoryItem = (item: HistoryEntry) => {
     setCurrentInput({ turkishInput: item.turkishInput, mode: item.mode });
     setCurrentResults(item.results);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top to see the form
+    setActiveTab("translate"); // Switch to translate tab
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
   };
 
   const handleToggleFavorite = (itemId: string) => {
@@ -109,7 +110,7 @@ export default function BioLinguaLearnPage() {
 
   const handleClearHistory = () => {
     setHistory([]);
-    setFavorites(prevFavorites => prevFavorites.filter(favId => !history.find(h => h.id === favId))); // Keep favorites that might not be in current history view if history was truncated
+    setFavorites(prevFavorites => prevFavorites.filter(favId => !history.find(h => h.id === favId)));
     toast({ title: "History Cleared" });
   };
   
@@ -125,98 +126,101 @@ export default function BioLinguaLearnPage() {
       <AppHeader />
       <main className="container mx-auto py-8 px-4 md:px-6 lg:px-8 flex-1">
         <div className="mx-auto max-w-3xl">
-          <InputForm 
-            onSubmit={handleFormSubmit} 
-            isLoading={isLoading} 
-            defaultValues={{ turkishInput: currentInput?.turkishInput || '', mode: currentInput?.mode || lastMode }}
-          />
-          <ResultsDisplay results={currentResults} isLoading={isLoading} turkishInput={currentInput?.turkishInput} />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="translate" className="gap-1">
+                <Languages className="h-4 w-4" />
+                Translate
+              </TabsTrigger>
+              <TabsTrigger value="history" className="gap-1">
+                <HistoryIcon className="h-4 w-4" />
+                History {history.length > 0 && <span className="ml-1 text-xs">({history.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="favorites" className="gap-1">
+                <Star className="h-4 w-4" />
+                Favorites {favoriteEntries.length > 0 && <span className="ml-1 text-xs">({favoriteEntries.length})</span>}
+              </TabsTrigger>
+            </TabsList>
 
-          <Accordion 
-            type="single" 
-            collapsible 
-            className="w-full mt-12"
-            value={activeAccordionItem}
-            onValueChange={setActiveAccordionItem}
-          >
-            <AccordionItem value="history">
-              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <History className="h-5 w-5 text-primary" />
-                  Translation History
-                  {history.length > 0 && <span className="text-sm font-normal text-muted-foreground">({history.length})</span>}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pt-2">
+            <TabsContent value="translate">
+              <InputForm 
+                onSubmit={handleFormSubmit} 
+                isLoading={isLoading} 
+                defaultValues={{ turkishInput: currentInput?.turkishInput || '', mode: currentInput?.mode || lastMode }}
+              />
+              <ResultsDisplay results={currentResults} isLoading={isLoading} turkishInput={currentInput?.turkishInput} />
+            </TabsContent>
+
+            <TabsContent value="history">
+              <div className="space-y-4">
                 {history.length > 0 && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleClearHistory}
-                    className="mb-4"
+                    className="w-full sm:w-auto"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Clear History
                   </Button>
                 )}
-                <ScrollArea className="h-[300px] pr-3">
+                <ScrollArea className="h-[400px] pr-3 border rounded-md">
                   {history.length === 0 ? (
                     <p className="p-4 text-center text-sm text-muted-foreground">No history yet.</p>
                   ) : (
-                    history.map(item => (
-                      <ActivityItemCard
-                        key={item.id}
-                        item={item}
-                        isFavorite={favorites.includes(item.id)}
-                        onSelectItem={handleSelectHistoryItem}
-                        onToggleFavorite={handleToggleFavorite}
-                      />
-                    ))
+                    <div className="p-2 space-y-2">
+                      {history.map(item => (
+                        <ActivityItemCard
+                          key={item.id}
+                          item={item}
+                          isFavorite={favorites.includes(item.id)}
+                          onSelectItem={handleSelectHistoryItem}
+                          onToggleFavorite={handleToggleFavorite}
+                        />
+                      ))}
+                    </div>
                   )}
                 </ScrollArea>
-              </AccordionContent>
-            </AccordionItem>
+              </div>
+            </TabsContent>
 
-            <AccordionItem value="favorites">
-              <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 text-primary" />
-                  Favorite Entries
-                  {favoriteEntries.length > 0 && <span className="text-sm font-normal text-muted-foreground">({favoriteEntries.length})</span>}
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="pt-2">
+            <TabsContent value="favorites">
+              <div className="space-y-4">
                 {favoriteEntries.length > 0 && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleClearFavorites}
-                    className="mb-4"
+                    className="w-full sm:w-auto"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     Clear Favorites
                   </Button>
                 )}
-                <ScrollArea className="h-[300px] pr-3">
+                <ScrollArea className="h-[400px] pr-3 border rounded-md">
                   {favoriteEntries.length === 0 ? (
                     <p className="p-4 text-center text-sm text-muted-foreground">No favorites yet.</p>
                   ) : (
-                    favoriteEntries.map(item => (
-                      <ActivityItemCard
-                        key={item.id}
-                        item={item}
-                        isFavorite={true} // It's a favorite by definition here
-                        onSelectItem={handleSelectHistoryItem}
-                        onToggleFavorite={handleToggleFavorite}
-                      />
-                    ))
+                     <div className="p-2 space-y-2">
+                      {favoriteEntries.map(item => (
+                        <ActivityItemCard
+                          key={item.id}
+                          item={item}
+                          isFavorite={true} 
+                          onSelectItem={handleSelectHistoryItem}
+                          onToggleFavorite={handleToggleFavorite}
+                        />
+                      ))}
+                    </div>
                   )}
                 </ScrollArea>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>
   );
 }
+
+    
