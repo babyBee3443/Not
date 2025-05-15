@@ -53,9 +53,12 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false }
       setIsSpeaking(false);
     };
     utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
-      console.error("Speech synthesis error. Code:", event.error, "Content length:", content?.length);
-      // Only show toast for errors other than 'interrupted'
-      if (event.error !== 'interrupted') {
+      if (event.error === 'interrupted') {
+        // Log interruptions as warnings, as they are often intentional
+        console.warn("Speech synthesis interrupted. Code:", event.error, "Content length:", content?.length);
+      } else {
+        // Log other errors as actual errors
+        console.error("Speech synthesis error. Code:", event.error, "Content length:", content?.length);
         toast({ title: "Speech Error", description: "Could not play audio.", variant: "destructive" });
       }
       setIsSpeaking(false);
