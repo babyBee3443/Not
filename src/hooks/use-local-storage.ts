@@ -1,55 +1,52 @@
-import { useState, useEffect, Dispatch, SetStateAction } from 'react';
+
+import { useState, useEffect, Dispatch, SetStateAction, useCallback } from 'react';
 
 type SetValue<T> = Dispatch<SetStateAction<T>>;
 
 function useLocalStorage<T>(key: string, initialValue: T): [T, SetValue<T>] {
-  // Get from local storage then
-  // parse stored json or return initialValue
-  const readValue = (): T => {
-    // Prevent build error "window is undefined" but keep keep working
-    if (typeof window === 'undefined') {
-      return initialValue;
-    }
+  // Initialize state with initialValue. This ensures that the first render on the client
+  // matches the server-rendered output, preventing a hydration mismatch.
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
 
-    try {
-      const item = window.localStorage.getItem(key);
-      return item ? (JSON.parse(item) as T) : initialValue;
-    } catch (error) {
-      console.warn(`Error reading localStorage key "${key}":`, error);
-      return initialValue;
-    }
-  };
-
-  // State to store our value
-  // Pass initial state function to useState so logic is only executed once
-  const [storedValue, setStoredValue] = useState<T>(readValue);
-
-  // Return a wrapped version of useState's setter function that ...
-  // ... persists the new value to localStorage.
-  const setValue: SetValue<T> = value => {
-    // Prevent build error "window is undefined" but keep keep working
-    if (typeof window === 'undefined') {
-      console.warn(
-        `Tried setting localStorage key "${key}" even though environment is not a client`
-      );
-    }
-
-    try {
-      // Allow value to be a function so we have same API as useState
-      const newValue = value instanceof Function ? value(storedValue) : value;
-      // Save to local storage
-      window.localStorage.setItem(key, JSON.stringify(newValue));
-      // Save state
-      setStoredValue(newValue);
-    } catch (error) {
-      console.warn(`Error setting localStorage key "${key}":`, error);
-    }
-  };
-
+  // This effect runs only on the client, after the initial render.
+  // It reads the value from localStorage and updates the state if a value is found.
   useEffect(() => {
-    setStoredValue(readValue());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // Check for window to ensure this only runs on the client.
+    if (typeof window !== 'undefined') {
+      try {
+        const item = window.localStorage.getItem(key);
+        if (item !== null) { // Only update if item actually exists
+          setStoredValue(JSON.parse(item) as T);
+        }
+        // If item is null, storedValue remains `initialValue` due to useState initialization.
+      } catch (error) {
+        console.warn(`Error reading localStorage key "${key}":`, error);
+        // In case of error, storedValue remains `initialValue`.
+      }
+    }
+  }, [key]); // Dependency array includes `key` so the effect re-runs if the key changes.
+
+  const setValue: SetValue<T> = useCallback(
+    value => {
+      // Determine the new value first, allowing for function form of setState.
+      const newValue = value instanceof Function ? value(storedValue) : value;
+      
+      // Update React state. This is the primary source of truth for the UI.
+      setStoredValue(newValue);
+
+      // Then, attempt to persist to localStorage if on the client.
+      if (typeof window !== 'undefined') {
+        try {
+          window.localStorage.setItem(key, JSON.stringify(newValue));
+        } catch (error) {
+          console.warn(`Error setting localStorage key "${key}":`, error);
+          // localStorage persistence failed, but React state is already updated.
+        }
+      }
+    },
+    [key, storedValue] // `storedValue` is needed for the updater function `value(storedValue)`.
+                        // `key` is needed for localStorage.setItem.
+  );
 
   return [storedValue, setValue];
 }
