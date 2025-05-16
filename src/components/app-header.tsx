@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FlaskConical } from 'lucide-react';
+import { FlaskConical, BookOpenCheck } from 'lucide-react'; // Added BookOpenCheck
 import { ThemeToggleButton } from '@/components/theme-toggle-button';
 import { cn } from '@/lib/utils';
 
@@ -13,6 +13,7 @@ export function AppHeader() {
   const navLinks = [
     { href: '/', label: 'Çeviri' },
     { href: '/notes', label: 'Not Oluştur' },
+    { href: '/test', label: 'Test Oluştur' }, // Added new link
   ];
 
   return (
@@ -42,6 +43,7 @@ export function AppHeader() {
 
         <div className="flex items-center gap-2">
           <ThemeToggleButton />
+          {/* Mobile menu toggle can be added here if needed later */}
         </div>
       </div>
     </header>
