@@ -12,6 +12,7 @@ import { Camera, ImageUp, RefreshCcw, ScanSearch, CheckCircle, XCircle, VideoOff
 import Image from 'next/image';
 import { ScrollToTopButton } from '@/components/scroll-to-top-button';
 import { solveImageQuestion, type SolveImageQuestionOutput } from '@/ai/flows/solve-image-question-flow';
+import { Textarea } from '@/components/ui/textarea'; // Added Textarea import
 
 type Mode = 'select' | 'camera' | 'upload' | 'preview' | 'results';
 
@@ -22,6 +23,8 @@ export default function ScanQuestionPage() {
   const [isProcessingAi, setIsProcessingAi] = React.useState(false);
   const [aiResults, setAiResults] = React.useState<SolveImageQuestionOutput | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [showFeedbackForm, setShowFeedbackForm] = React.useState(false); // State for feedback form
+  const [feedbackText, setFeedbackText] = React.useState(''); // State for feedback text
   
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -72,6 +75,8 @@ export default function ScanQuestionPage() {
         setImageSrc(dataUrl);
         setAiResults(null); 
         setError(null);
+        setShowFeedbackForm(false); // Reset feedback form
+        setFeedbackText('');
         setMode('preview');
         if (videoRef.current && videoRef.current.srcObject) {
             const stream = videoRef.current.srcObject as MediaStream;
@@ -92,6 +97,8 @@ export default function ScanQuestionPage() {
         setImageSrc(e.target?.result as string);
         setAiResults(null); 
         setError(null);
+        setShowFeedbackForm(false); // Reset feedback form
+        setFeedbackText('');
         setMode('preview');
       };
       reader.readAsDataURL(file);
@@ -102,6 +109,8 @@ export default function ScanQuestionPage() {
     setImageSrc(null);
     setError(null);
     setAiResults(null);
+    setShowFeedbackForm(false);
+    setFeedbackText('');
     setMode('select');
     if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -113,6 +122,8 @@ export default function ScanQuestionPage() {
     setIsProcessingAi(true);
     setError(null);
     setAiResults(null);
+    setShowFeedbackForm(false);
+    setFeedbackText('');
 
     try {
       const result = await solveImageQuestion({ imageDataUri: imageSrc });
@@ -135,6 +146,22 @@ export default function ScanQuestionPage() {
     } finally {
       setIsProcessingAi(false);
     }
+  };
+
+  const handleToggleFeedbackForm = () => {
+    setShowFeedbackForm(prev => !prev);
+    if (showFeedbackForm) setFeedbackText(''); // Clear text if closing
+  };
+
+  const handleFeedbackSubmit = () => {
+    console.log("Kullanıcı Geri Bildirimi:", feedbackText);
+    toast({
+      title: "Geri Bildirim Alındı",
+      description: "Değerli geri bildiriminiz için teşekkür ederiz!",
+    });
+    setFeedbackText('');
+    setShowFeedbackForm(false);
+    // Here you would typically send the feedback to a backend service
   };
   
   const renderContent = () => {
@@ -243,7 +270,7 @@ export default function ScanQuestionPage() {
           </div>
         );
         case 'results':
-            if (!aiResults) { // Should not happen if mode is 'results' but good for safety
+            if (!aiResults) { 
                 return (
                   <div className="space-y-4 flex flex-col items-center">
                     <p>Sonuçlar yüklenirken bir sorun oluştu.</p>
@@ -251,23 +278,7 @@ export default function ScanQuestionPage() {
                   </div>
                 );
             }
-            // This check is now redundant here as we only switch to 'results' if isBiologyQuestion is true.
-            // Kept for robustness in case of direct state manipulation in future.
-            if (!aiResults.isBiologyQuestion) {
-                 return (
-                    <div className="space-y-4 flex flex-col items-center">
-                        <Alert variant="default" className="w-full max-w-md">
-                            <HelpCircleIcon className="h-4 w-4" />
-                            <AlertTitle>Soru Tanımlanamadı</AlertTitle>
-                            <AlertDescription>{aiResults.explanation || "Görüntü bir biyoloji sorusu olarak tanımlanamadı."}</AlertDescription>
-                        </Alert>
-                        <Button onClick={handleRetakeOrUploadAnother} variant="outline" className="w-full max-w-md">
-                            <RefreshCcw className="mr-2 h-5 w-5" /> Başka Bir Soru Dene
-                        </Button>
-                    </div>
-                );
-            }
-
+           
             return (
                 <div className="space-y-6">
                     <h2 className="text-2xl font-bold text-primary text-center">Yapay Zeka Çözümü</h2>
@@ -307,6 +318,40 @@ export default function ScanQuestionPage() {
                             <p className="text-foreground/90 whitespace-pre-wrap">{aiResults.explanation}</p>
                         </CardContent>
                     </Card>
+
+                    {/* Feedback Section */}
+                    {aiResults.isBiologyQuestion && (
+                      <Card className="mt-6 border-blue-500 dark:border-blue-400">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                            <MessageSquare className="h-5 w-5" />
+                            Cevap Hakkında Geri Bildirim
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {!showFeedbackForm ? (
+                            <Button variant="outline" onClick={handleToggleFeedbackForm} className="w-full sm:w-auto">
+                              Cevap Yanlış mı? Düzeltme Önerin
+                            </Button>
+                          ) : (
+                            <div className="space-y-3">
+                              <Textarea
+                                placeholder="Yapay zekanın cevabıyla ilgili düşünceleriniz, doğru cevap veya eklemek istedikleriniz..."
+                                value={feedbackText}
+                                onChange={(e) => setFeedbackText(e.target.value)}
+                                rows={4}
+                                className="text-sm"
+                              />
+                              <div className="flex flex-col sm:flex-row justify-end gap-2">
+                                <Button variant="ghost" onClick={handleToggleFeedbackForm} size="sm">İptal</Button>
+                                <Button onClick={handleFeedbackSubmit} disabled={!feedbackText.trim()} size="sm">Geri Bildirimi Gönder</Button>
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
                     <Button onClick={handleRetakeOrUploadAnother} variant="default" className="w-full text-lg py-3">
                         <RefreshCcw className="mr-2 h-5 w-5" /> Yeni Soru Tara
                     </Button>
@@ -329,5 +374,3 @@ export default function ScanQuestionPage() {
     </div>
   );
 }
-
-    
