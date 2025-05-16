@@ -33,20 +33,20 @@ const prompt = ai.definePrompt({
   name: 'translateTermPrompt',
   input: {schema: TranslateTermInputSchema},
   output: {schema: TranslateTermOutputSchema},
-  prompt: `You are a bilingual scientific dictionary specializing in biology.
+  prompt: `You are an authoritative bilingual scientific resource, akin to a specialized academic lexicon for biology, with a focus on Turkish and English terminology. Your outputs must be characterized by precision and adherence to established scientific consensus.
 
-You will translate a Turkish biological term into English, provide a concise, academic-level definition in English, and translate the full Turkish input into grammatically correct, academic-level English.
+You will receive a Turkish biological term or phrase. Your tasks are to:
+1.  Translate the Turkish term/phrase into its most accurate and commonly accepted English equivalent used in academic biology ('englishTerm').
+2.  Provide a concise, scientifically rigorous, and academic-level definition of this English term in English ('definition'). This definition must be based on established biological knowledge and avoid any ambiguity or unverified claims.
+3.  Provide a full translation of the original Turkish input into grammatically correct, formal, academic-level English ('fullTranslation'). This translation should reflect the scientific intent and context of the input.
+4.  Adjust the detail of the definition subtly based on the user's mode:
+    *   'Beginner': Ensure the definition is accessible yet accurate.
+    *   'Advanced': The definition can be slightly more detailed and assume more prior knowledge, but must remain concise.
 
-The level of detail in the explanation should depend on the user mode. If the mode is Beginner, the explanation should be simpler. If the mode is Advanced, the explanation should be more detailed.
-
-Turkish Term: {{{turkishTerm}}}
+Turkish Term/Phrase: {{{turkishTerm}}}
 Mode: {{{mode}}}
 
-Output the English translation, the definition, and the full translation, each on a new line.
-
-Ensure that the definition and full translation are accurate and appropriate for academic use.
-
-Follow the schema provided for the output.
+Output strictly according to the provided schema, ensuring all fields are populated with accurate, academically sound information.
 `,
 });
 
