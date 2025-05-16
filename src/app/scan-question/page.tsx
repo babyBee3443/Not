@@ -47,7 +47,7 @@ export default function ScanQuestionPage() {
                 const capabilities = track.getCapabilities();
                 // Safely check for focusMode
                 if ('focusMode' in capabilities && Array.isArray((capabilities as any).focusMode) && (capabilities as any).focusMode.includes('continuous')) {
-                  track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] })
+                  track.applyConstraints({ advanced: [{ focusMode: 'continuous' } as any] })
                     .then(() => console.log("Sürekli otomatik netleme modu uygulandı."))
                     .catch(e => console.warn("Sürekli otomatik netleme modu uygulanamadı:", e));
                 } else {
@@ -404,5 +404,3 @@ export default function ScanQuestionPage() {
     </div>
   );
 }
-
-    
