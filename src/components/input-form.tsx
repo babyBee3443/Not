@@ -42,6 +42,16 @@ export function InputForm({ onSubmit, isLoading, defaultValues }: InputFormProps
     }
   }, [defaultValues, form]);
 
+  const handleTextareaKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault(); // Prevent new line
+      if (!isLoading) {
+        // Directly call handleSubmit; it will internally call the onSubmit passed to it.
+        form.handleSubmit(onSubmit)();
+      }
+    }
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -56,6 +66,8 @@ export function InputForm({ onSubmit, isLoading, defaultValues }: InputFormProps
                   placeholder="e.g., 'kromozom' or 'Hücre zarının yapısı ve işlevleri nelerdir?'"
                   className="min-h-[120px] resize-none text-base p-4 rounded-lg shadow-sm"
                   {...field}
+                  onKeyDown={handleTextareaKeyDown}
+                  disabled={isLoading}
                 />
               </FormControl>
               <FormMessage />
@@ -80,6 +92,7 @@ export function InputForm({ onSubmit, isLoading, defaultValues }: InputFormProps
                     onCheckedChange={(checked) => field.onChange(checked ? 'Advanced' : 'Beginner')}
                     aria-label="Açıklama detay modu"
                     className="data-[state=unchecked]:bg-muted/50"
+                    disabled={isLoading}
                   />
                 </FormControl>
                 <Label htmlFor="explanation-mode-switch" className="font-normal">
