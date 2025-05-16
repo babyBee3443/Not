@@ -1,4 +1,3 @@
-
 // src/app/test/page.tsx
 "use client";
 
@@ -9,7 +8,8 @@ import { TestDisplay } from '@/components/test-display';
 import { generateBiologyTest, type GenerateBiologyTestOutput } from '@/ai/flows/generate-biology-test-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, Loader2, Newspaper, FileText } from "lucide-react";
+import { Terminal, Loader2, FileText } from "lucide-react";
+import { ScrollToTopButton } from '@/components/scroll-to-top-button';
 
 export default function TestPage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -32,7 +32,7 @@ export default function TestPage() {
       setTestData(result);
       toast({
         title: "Test Oluşturuldu!",
-        description: `"${values.topic || 'Genel Biyoloji'}" konusu için ${values.numberOfQuestions} soruluk test başarıyla oluşturuldu.`,
+        description: `${values.topic ? `"${values.topic}" konusu` : "Genel Biyoloji"} için ${values.numberOfQuestions} soruluk test başarıyla oluşturuldu.`,
       });
     } catch (err) {
       console.error("Error generating test:", err);
@@ -86,7 +86,7 @@ export default function TestPage() {
           {isLoading && !testData && (
              <div className="flex flex-col justify-center items-center py-10">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                <p className="ml-4 text-lg text-muted-foreground mt-4">Testiniz hazırlanıyor, bu işlem biraz zaman alabilir...</p>
+                <p className="text-lg text-muted-foreground mt-4">Testiniz hazırlanıyor, bu işlem biraz zaman alabilir...</p>
                 <p className="text-sm text-muted-foreground mt-1">Lütfen sabırla bekleyin.</p>
              </div>
           )}
@@ -96,6 +96,7 @@ export default function TestPage() {
           )}
         </div>
       </main>
+      <ScrollToTopButton />
     </div>
   );
 }
