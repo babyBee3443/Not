@@ -14,6 +14,7 @@ import {z} from 'genkit';
 const GenerateFillBlankInputSchema = z.object({
   topic: z.string().describe('The biology topic for the exercise (e.g., "Hücre Zarı", "Fotosentez").'),
   gradeLevel: z.enum(['9', '10', '11', '12']).describe("The student's grade level (9th, 10th, 11th, or 12th grade)."),
+  difficultyLevel: z.enum(['Kolay', 'Orta', 'Zor']).default('Orta').describe('Alıştırmanın zorluk seviyesi ("Kolay", "Orta", "Zor").'),
 });
 export type GenerateFillBlankInput = z.infer<typeof GenerateFillBlankInputSchema>;
 
@@ -33,11 +34,12 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateFillBlankInputSchema},
   output: {schema: GenerateFillBlankOutputSchema},
   prompt: `
-You are an expert Turkish high school biology teacher. Your task is to create a fill-in-the-blank exercise in TURKISH based on the provided topic and grade level.
+You are an expert Turkish high school biology teacher. Your task is to create a fill-in-the-blank exercise in TURKISH based on the provided topic, grade level, and difficulty level.
 
 Student's Request:
 Topic: {{{topic}}}
 Grade Level: {{{gradeLevel}}}
+Difficulty Level: {{{difficultyLevel}}}
 
 Instructions:
 1.  **Create a Sentence**: Formulate a clear, concise, and factually accurate sentence in Turkish related to the given 'topic' and appropriate for the 'gradeLevel'. This sentence must highlight a key biological term.
@@ -48,10 +50,16 @@ Instructions:
     *   The other options should be plausible distractors – terms that are related to the topic or sound similar, but are incorrect in the context of the sentence.
     *   All options, including the correct answer, must be in Turkish.
 5.  **Curriculum Adherence**: Ensure the content is accurate and aligns with the Turkish Ministry of National Education (MEB) high school biology curriculum for the specified 'gradeLevel'.
+6.  **Difficulty Level Adherence ('difficultyLevel')**:
+    *   'Kolay': The sentence should test a fundamental concept directly. The term to be filled in the blank should be common and essential for the topic at the specified grade level. Distractor options can be clearly incorrect or less related.
+    *   'Orta': The sentence can test a slightly more nuanced concept or require basic application of knowledge. The blank term should be important, and distractors should be plausible but distinguishable with good understanding.
+    *   'Zor': The sentence might involve more complex wording or test a specific detail of the topic. The blank term could be less common or require deeper understanding. Distractors should be very plausible and require careful discrimination.
+    The complexity of the sentence, the choice of the blank term, and the subtlety of the distractors MUST be adjusted based on this difficulty level.
 
 Example Output Structure (for a different topic):
 Topic: Sindirim Sistemi
 Grade Level: 10
+Difficulty Level: Orta
 Output:
 {
   "exerciseSentence": "İnce bağırsakta proteinlerin kimyasal sindirimini başlatan enzim __BLANK__ enzimidir.",
@@ -77,3 +85,5 @@ const generateFillBlankFlow = ai.defineFlow(
     return output;
   }
 );
+
+    

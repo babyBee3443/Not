@@ -1,3 +1,4 @@
+
 // src/app/exercises/page.tsx
 "use client";
 
@@ -29,11 +30,12 @@ export default function FillBlankExercisePage() {
       const result = await generateFillBlankExercise({
         topic: values.topic,
         gradeLevel: values.gradeLevel,
+        difficultyLevel: values.difficultyLevel, // Pass difficultyLevel
       });
       setExerciseData(result);
       toast({
         title: "Alıştırma Hazır!",
-        description: `"${values.topic}" konusu için boşluk doldurma alıştırması oluşturuldu.`,
+        description: `"${values.topic}" konusu için ${values.difficultyLevel.toLowerCase()} seviyesinde boşluk doldurma alıştırması oluşturuldu.`,
       });
     } catch (err) {
       console.error("Error generating fill-in-the-blank exercise:", err);
@@ -54,12 +56,12 @@ export default function FillBlankExercisePage() {
   
   const handleNextExercise = () => {
     if (currentFormValues) {
-        handleFormSubmit(currentFormValues);
+        handleFormSubmit(currentFormValues); // This will use the stored difficultyLevel
     } else {
         setExerciseData(null); 
         toast({
             title: "Form Bilgisi Eksik",
-            description: "Yeni alıştırma istemek için lütfen önce bir konu ve sınıf seçin.",
+            description: "Yeni alıştırma istemek için lütfen önce bir konu, sınıf ve zorluk seviyesi seçin.",
             variant: "destructive"
         });
     }
@@ -83,7 +85,7 @@ export default function FillBlankExercisePage() {
                 <BrainCircuit className="h-16 w-16 text-primary mx-auto mb-4" />
                 <h1 className="text-3xl font-bold text-primary">Boşluk Doldurma Alıştırmaları</h1>
                 <p className="text-muted-foreground mt-2">
-                  Biyoloji bilginizi pekiştirin! Konu ve sınıf seviyesi seçerek size özel boşluk doldurma alıştırmaları oluşturun.
+                  Biyoloji bilginizi pekiştirin! Konu, sınıf ve zorluk seviyesi seçerek size özel boşluk doldurma alıştırmaları oluşturun.
                 </p>
               </div>
               <FillBlankForm onSubmit={handleFormSubmit} isLoading={isLoading} />
@@ -111,7 +113,7 @@ export default function FillBlankExercisePage() {
               exerciseData={exerciseData} 
               onNextExercise={handleNextExercise}
               isLoadingNext={isLoading} 
-              onGoBackToForm={handleGoBackToForm} // Pass the new handler
+              onGoBackToForm={handleGoBackToForm}
             />
           )}
         </div>
@@ -120,3 +122,5 @@ export default function FillBlankExercisePage() {
     </div>
   );
 }
+
+    

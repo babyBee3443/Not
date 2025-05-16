@@ -1,3 +1,4 @@
+
 // src/components/fill-blank-form.tsx
 "use client";
 
@@ -9,11 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 import { Loader2, Wand2 } from 'lucide-react';
 
 const fillBlankFormSchema = z.object({
   topic: z.string().min(3, { message: 'Konu en az 3 karakter olmalıdır.' }).max(150, { message: 'Konu 150 karakteri aşamaz.' }),
   gradeLevel: z.enum(['9', '10', '11', '12'], { errorMap: () => ({ message: "Lütfen geçerli bir sınıf seviyesi seçin."}) }),
+  difficultyLevel: z.enum(['Kolay', 'Orta', 'Zor'], { errorMap: () => ({ message: "Lütfen geçerli bir zorluk seviyesi seçin."}) }),
 });
 
 export type FillBlankFormValues = z.infer<typeof fillBlankFormSchema>;
@@ -29,6 +33,7 @@ export function FillBlankForm({ onSubmit, isLoading }: FillBlankFormProps) {
     defaultValues: {
       topic: '',
       gradeLevel: '9',
+      difficultyLevel: 'Orta',
     },
   });
 
@@ -57,7 +62,8 @@ export function FillBlankForm({ onSubmit, isLoading }: FillBlankFormProps) {
           )}
         />
 
-        <FormField
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
             control={form.control}
             name="gradeLevel"
             render={({ field }) => (
@@ -81,6 +87,38 @@ export function FillBlankForm({ onSubmit, isLoading }: FillBlankFormProps) {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="difficultyLevel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-lg font-semibold">Zorluk Seviyesi</FormLabel>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex flex-col space-y-1 pt-2" // Adjusted for better layout
+                  disabled={isLoading}
+                >
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl><RadioGroupItem value="Kolay" /></FormControl>
+                    <Label className="font-normal">Kolay</Label>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl><RadioGroupItem value="Orta" /></FormControl>
+                    <Label className="font-normal">Orta</Label>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl><RadioGroupItem value="Zor" /></FormControl>
+                    <Label className="font-normal">Zor</Label>
+                  </FormItem>
+                </RadioGroup>
+                <FormDescription>Alıştırmanın zorluk derecesi.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
         
         <Button 
           type="submit" 
@@ -103,3 +141,5 @@ export function FillBlankForm({ onSubmit, isLoading }: FillBlankFormProps) {
     </Form>
   );
 }
+
+    
