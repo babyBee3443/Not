@@ -8,8 +8,9 @@ import { FillBlankDisplay } from '@/components/fill-blank-display';
 import { generateFillBlankExercise, type GenerateFillBlankOutput } from '@/ai/flows/generate-fill-blank-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, Loader2, BrainCircuit } from "lucide-react";
+import { Terminal, Loader2, BrainCircuit, ArrowLeft } from "lucide-react";
 import { ScrollToTopButton } from '@/components/scroll-to-top-button';
+import { Button } from '@/components/ui/button';
 
 export default function FillBlankExercisePage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -20,9 +21,9 @@ export default function FillBlankExercisePage() {
 
   const handleFormSubmit = async (values: FillBlankFormValues) => {
     setIsLoading(true);
-    setExerciseData(null); // Clear previous exercise while loading new one
+    setExerciseData(null); 
     setError(null);
-    setCurrentFormValues(values); // Store current form values for "New Exercise" button
+    setCurrentFormValues(values); 
 
     try {
       const result = await generateFillBlankExercise({
@@ -55,8 +56,7 @@ export default function FillBlankExercisePage() {
     if (currentFormValues) {
         handleFormSubmit(currentFormValues);
     } else {
-        // Fallback or error if no previous form values (should not happen if an exercise is displayed)
-        setExerciseData(null); // Go back to form
+        setExerciseData(null); 
         toast({
             title: "Form Bilgisi Eksik",
             description: "Yeni alıştırma istemek için lütfen önce bir konu ve sınıf seçin.",
@@ -65,13 +65,19 @@ export default function FillBlankExercisePage() {
     }
   };
 
+  const handleGoBackToForm = () => {
+    setExerciseData(null);
+    setError(null);
+    // setCurrentFormValues(null); // Optional: if you want form fields to reset fully
+  };
+
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <AppHeader />
       <main className="container mx-auto py-8 px-4 md:px-6 lg:px-8 flex-1">
         <div className="mx-auto max-w-3xl space-y-8">
-          {!exerciseData && !isLoading && ( // Show form only if no exercise is loaded and not loading
+          {!exerciseData && !isLoading && ( 
             <div>
               <div className="text-center mb-8">
                 <BrainCircuit className="h-16 w-16 text-primary mx-auto mb-4" />
@@ -104,7 +110,8 @@ export default function FillBlankExercisePage() {
             <FillBlankDisplay 
               exerciseData={exerciseData} 
               onNextExercise={handleNextExercise}
-              isLoadingNext={isLoading} // Pass loading state for the button
+              isLoadingNext={isLoading} 
+              onGoBackToForm={handleGoBackToForm} // Pass the new handler
             />
           )}
         </div>

@@ -7,17 +7,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { CheckCircle2, XCircle, RefreshCw, HelpCircle } from 'lucide-react';
+import { CheckCircle2, XCircle, RefreshCw, HelpCircle, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 interface FillBlankDisplayProps {
   exerciseData: GenerateFillBlankOutput;
-  onNextExercise: () => void; // Callback to trigger fetching a new exercise
-  isLoadingNext: boolean; // To disable button while next exercise is loading
+  onNextExercise: () => void; 
+  isLoadingNext: boolean; 
+  onGoBackToForm: () => void; // New prop
 }
 
-export function FillBlankDisplay({ exerciseData, onNextExercise, isLoadingNext }: FillBlankDisplayProps) {
+export function FillBlankDisplay({ exerciseData, onNextExercise, isLoadingNext, onGoBackToForm }: FillBlankDisplayProps) {
   const [selectedAnswer, setSelectedAnswer] = React.useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const { toast } = useToast();
@@ -46,7 +47,6 @@ export function FillBlankDisplay({ exerciseData, onNextExercise, isLoadingNext }
     }
   };
 
-  // Reset component state when new exerciseData comes in
   React.useEffect(() => {
     setSelectedAnswer(null);
     setIsSubmitted(false);
@@ -115,13 +115,38 @@ export function FillBlankDisplay({ exerciseData, onNextExercise, isLoadingNext }
           </RadioGroup>
         </CardContent>
         <CardFooter className="p-6 border-t flex flex-col sm:flex-row justify-between items-center gap-3">
-          <Button onClick={onNextExercise} variant="outline" className="w-full sm:w-auto" disabled={isLoadingNext}>
-            <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingNext ? 'animate-spin' : ''}`} />
-            {isLoadingNext ? "Yükleniyor..." : "Yeni Alıştırma İste"}
+          <Button onClick={onGoBackToForm} variant="secondary" className="w-full sm:w-auto">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Forma Dön
           </Button>
-          <Button onClick={handleCheckAnswer} disabled={isSubmitted || selectedAnswer === null} className="w-full sm:w-auto text-lg py-3">
-            Cevabı Kontrol Et
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <Button 
+              onClick={onNextExercise} 
+              variant="outline" 
+              className="w-full sm:w-auto" 
+              disabled={isLoadingNext}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${isLoadingNext ? 'animate-spin' : ''}`} />
+              {isLoadingNext ? "Yükleniyor..." : "Yeni Alıştırma (Aynı Konu)"}
+            </Button>
+            {!isSubmitted ? (
+              <Button 
+                onClick={handleCheckAnswer} 
+                disabled={selectedAnswer === null} 
+                className="w-full sm:w-auto text-lg py-3"
+              >
+                Cevabı Kontrol Et
+              </Button>
+            ) : (
+              <Button 
+                disabled={true}
+                className="w-full sm:w-auto text-lg py-3"
+                variant="default" // Keep consistent styling, but disabled
+              >
+                Cevap Kontrol Edildi
+              </Button>
+            )}
+          </div>
         </CardFooter>
       </Card>
     </div>
