@@ -49,13 +49,13 @@ export default function ScanQuestionPage() {
                 const capabilities = track.getCapabilities();
                 if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
                   track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] })
-                    .then(() => console.log("Applied continuous focus mode."))
-                    .catch(e => console.warn("Could not apply continuous focus mode:", e));
+                    .then(() => console.log("Sürekli otomatik netleme modu uygulandı."))
+                    .catch(e => console.warn("Sürekli otomatik netleme modu uygulanamadı:", e));
                 } else {
-                  console.log("Continuous focus mode not supported by this camera/browser.");
+                  console.log("Sürekli otomatik netleme bu kamera/tarayıcı tarafından desteklenmiyor.");
                 }
               } else {
-                console.log("track.getCapabilities() not supported by this browser.");
+                console.log("track.getCapabilities() bu tarayıcı tarafından desteklenmiyor.");
               }
             }
           }
@@ -173,7 +173,12 @@ export default function ScanQuestionPage() {
   };
 
   const handleFeedbackSubmit = () => {
-    console.log("Kullanıcı Geri Bildirimi:", feedbackText);
+    // In a real app, you'd send this feedback to a server/database.
+    console.log("Kullanıcı Geri Bildirimi:", {
+      image: imageSrc ? imageSrc.substring(0, 50) + "..." : "Yok", // Log a snippet of image URI
+      aiResponse: aiResults,
+      feedback: feedbackText
+    });
     toast({
       title: "Geri Bildirim Alındı",
       description: "Değerli geri bildiriminiz için teşekkür ederiz!",
@@ -240,12 +245,21 @@ export default function ScanQuestionPage() {
             <Button onClick={() => setMode('select')} variant="outline" className="w-full max-w-md">
                <XCircle className="mr-2 h-5 w-5" /> İptal
             </Button>
-             {!hasCameraPermission && hasCameraPermission !== null && (
+             {hasCameraPermission === null && ( // Initial state before permission is known
+                 <Alert variant="default">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <AlertTitle>Kamera İzni İsteniyor</AlertTitle>
+                    <AlertDescription>
+                        Kamera erişimine izin vermeniz bekleniyor...
+                    </AlertDescription>
+                </Alert>
+            )}
+             {hasCameraPermission === false && ( // Explicitly denied
                  <Alert variant="destructive">
                     <VideoOff className="h-4 w-4" />
                     <AlertTitle>Kamera Erişimi Gerekli</AlertTitle>
                     <AlertDescription>
-                        Bu özelliği kullanmak için lütfen kamera erişimine izin verin.
+                        Bu özelliği kullanmak için lütfen kamera erişimine izin verin. Ayarlardan izin verdikten sonra sayfayı yenileyebilirsiniz.
                     </AlertDescription>
                 </Alert>
             )}
@@ -269,16 +283,16 @@ export default function ScanQuestionPage() {
             <Button onClick={handleRetakeOrUploadAnother} variant="outline" className="w-full max-w-md" disabled={isProcessingAi}>
               <RefreshCcw className="mr-2 h-5 w-5" /> Yeniden Çek / Başka Yükle
             </Button>
-            {error && (
+            {error && ( // This error is from AI processing or other issues in 'preview'
                 <Alert 
-                  variant={(aiResults && !aiResults.isBiologyQuestion) || (error && error.includes("tanımlanamadı")) ? "default" : "destructive"} 
+                  variant={(aiResults && !aiResults.isBiologyQuestion) || (error && (error.includes("tanımlanamadı") || error.includes("algılanamadı") )) ? "default" : "destructive"} 
                   className="w-full max-w-md"
                 >
-                    {(aiResults && !aiResults.isBiologyQuestion) || (error && error.includes("tanımlanamadı"))
+                    {(aiResults && !aiResults.isBiologyQuestion) || (error && (error.includes("tanımlanamadı") || error.includes("algılanamadı") ))
                         ? <HelpCircleIcon className="h-4 w-4" /> 
                         : <XCircle className="h-4 w-4" />}
                     <AlertTitle>
-                        {(aiResults && !aiResults.isBiologyQuestion) || (error && error.includes("tanımlanamadı"))
+                        {(aiResults && !aiResults.isBiologyQuestion) || (error && (error.includes("tanımlanamadı") || error.includes("algılanamadı") ))
                             ? "Soru Tanımlanamadı" 
                             : "İşlem Hatası"}
                     </AlertTitle>
@@ -288,7 +302,7 @@ export default function ScanQuestionPage() {
           </div>
         );
         case 'results':
-            if (!aiResults) { 
+            if (!aiResults) { // Should not happen if mode is 'results' but as a fallback
                 return (
                   <div className="space-y-4 flex flex-col items-center">
                     <p>Sonuçlar yüklenirken bir sorun oluştu.</p>
@@ -300,7 +314,7 @@ export default function ScanQuestionPage() {
             return (
                 <div className="space-y-6">
                     <h2 className="text-2xl font-bold text-primary text-center">Yapay Zeka Çözümü</h2>
-                    {imageSrc && (
+                    {imageSrc && ( // Show the scanned image along with results
                         <Card className="overflow-hidden shadow-lg">
                             <CardHeader>
                                 <CardTitle>Taranan Soru Görüntüsü</CardTitle>
@@ -337,13 +351,14 @@ export default function ScanQuestionPage() {
                         </CardContent>
                     </Card>
 
-                    {aiResults.isBiologyQuestion && (
+                    {aiResults.isBiologyQuestion && ( // Only show feedback if AI attempted to answer a biology question
                       <Card className="mt-6 border-blue-500 dark:border-blue-400">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
                             <MessageSquare className="h-5 w-5" />
                             Cevap Hakkında Geri Bildirim
                           </CardTitle>
+                          <CardDescription>Yapay zekanın cevabı hatalı veya eksik mi? Düşüncelerinizi bizimle paylaşın.</CardDescription>
                         </CardHeader>
                         <CardContent>
                           {!showFeedbackForm ? (
@@ -391,5 +406,7 @@ export default function ScanQuestionPage() {
     </div>
   );
 }
+
+    
 
     
