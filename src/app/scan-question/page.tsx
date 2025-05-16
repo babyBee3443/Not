@@ -1,4 +1,3 @@
-
 // src/app/scan-question/page.tsx
 "use client";
 
@@ -234,6 +233,15 @@ export default function ScanQuestionPage() {
                  <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
             </div>
             <canvas ref={canvasRef} className="hidden" />
+            {hasCameraPermission === null && ( 
+                 <Alert variant="default" className="mt-4">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <AlertTitle>Kamera İzni İsteniyor</AlertTitle>
+                    <AlertDescription>
+                        Kameranıza erişmek için tarayıcınız sizden izin isteyebilir. Lütfen izin verin.
+                    </AlertDescription>
+                </Alert>
+            )}
             {hasCameraPermission && (
                 <Button onClick={handleCaptureImage} className="w-full max-w-md text-lg py-3">
                     <CheckCircle className="mr-2 h-5 w-5" /> Fotoğraf Çek
@@ -242,15 +250,6 @@ export default function ScanQuestionPage() {
             <Button onClick={() => setMode('select')} variant="outline" className="w-full max-w-md">
                <XCircle className="mr-2 h-5 w-5" /> İptal
             </Button>
-             {hasCameraPermission === null && ( 
-                 <Alert variant="default">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <AlertTitle>Kamera İzni İsteniyor</AlertTitle>
-                    <AlertDescription>
-                        Kamera erişimine izin vermeniz bekleniyor...
-                    </AlertDescription>
-                </Alert>
-            )}
              {hasCameraPermission === false && !error && ( 
                  <Alert variant="destructive">
                     <VideoOff className="h-4 w-4" />

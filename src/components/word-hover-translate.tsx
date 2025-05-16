@@ -14,8 +14,10 @@ interface WordHoverTranslateProps {
 function isWordTranslatable(word: string): boolean {
   const trimmedWord = word.trim();
   if (!trimmedWord) return false;
-  if (trimmedWord.length <= 1 && !trimmedWord.match(/[a-zA-Z]/)) return false; // Single non-alpha char
-  if (/^\d+$/.test(trimmedWord)) return false; // Only numbers
+  // Allow single letters if they are indeed letters (e.g. 'a', 'I')
+  if (trimmedWord.length === 1 && !trimmedWord.match(/[a-zA-Z]/i)) return false; 
+  if (trimmedWord.length > 0 && /^\d+$/.test(trimmedWord)) return false; // Only numbers
+  if (trimmedWord.length > 0 && !/[a-zA-Z]/.test(trimmedWord)) return false; // No letters at all (e.g. "---")
   return true;
 }
 
@@ -27,16 +29,17 @@ export function WordHoverTranslate({ word, className }: WordHoverTranslateProps)
   const [tooltipMessage, setTooltipMessage] = React.useState<string | null>(null);
 
   const fetchTranslation = async (wordToTranslate: string) => {
-    // This function is called only if isWordTranslatable is true from onOpenChange
     setIsLoading(true);
     setError(null);
-    setTooltipMessage(null); // Clear "hazırlanıyor" message
+    // setTooltipMessage(null); // Clear "hazırlanıyor" message earlier if needed
     try {
       const result = await translateEnglishWordToTurkish({ englishWord: wordToTranslate.trim() });
       setTranslatedWord(result.turkishWord);
+      setTooltipMessage(null); // Clear message once translation is successful
     } catch (err) {
       console.warn(`Kelime çevirme hatası (${wordToTranslate}):`, err);
       setError("Çeviri hatası");
+      setTooltipMessage("Çeviri hatası"); // Show error in tooltip
       setTranslatedWord(null);
     } finally {
       setIsLoading(false);
@@ -46,28 +49,30 @@ export function WordHoverTranslate({ word, className }: WordHoverTranslateProps)
   const handleOpenChange = (open: boolean) => {
     setIsTooltipOpen(open);
     if (open) {
-      if (!translatedWord && !isLoading && !error) {
-        if (isWordTranslatable(word)) {
-          setTooltipMessage("Çeviri için hazırlanıyor...");
-          fetchTranslation(word);
-        } else {
-          setTooltipMessage("Bu kelime çevrilmiyor.");
-          setTranslatedWord(null); // Ensure no stale translation is shown
-          setError(null);
-        }
+      if (!isWordTranslatable(word)) {
+        setTooltipMessage("Bu kelime çevrilemiyor.");
+        setTranslatedWord(null);
+        setError(null);
+        setIsLoading(false);
+      } else if (!translatedWord && !isLoading && !error) {
+        setTooltipMessage("Çeviri için hazırlanıyor...");
+        fetchTranslation(word);
+      } else if (error) {
+        setTooltipMessage("Çeviri hatası");
+      } else if (isLoading) {
+         setTooltipMessage("Çevriliyor...");
       } else {
-        // If already loaded, or loading, or error, no special message needed
-        setTooltipMessage(null);
+        setTooltipMessage(null); // Already loaded, no message needed
       }
     } else {
       // Tooltip is closing
-      setTooltipMessage(null);
-      // Optional: Could cancel ongoing fetch here if significant
+      // setTooltipMessage(null); // Clear message when closing if desired
     }
   };
 
   const handleTriggerInteraction = () => {
     // Manually toggle the open state, which will then call onOpenChange
+    // This also ensures that on mobile, a tap opens it and subsequent logic in onOpenChange runs.
     setIsTooltipOpen(prev => !prev);
   };
 
@@ -76,6 +81,7 @@ export function WordHoverTranslate({ word, className }: WordHoverTranslateProps)
       <Tooltip
         open={isTooltipOpen}
         onOpenChange={handleOpenChange}
+        delayDuration={300} // Slight delay before opening on hover
       >
         <TooltipTrigger asChild>
           <span
@@ -84,9 +90,8 @@ export function WordHoverTranslate({ word, className }: WordHoverTranslateProps)
               className,
               isTooltipOpen ? "bg-accent/70" : ""
             )}
-            tabIndex={0}
-            onClick={handleTriggerInteraction}
-            onKeyDown={(e) => {
+            onClick={handleTriggerInteraction} // For tap on mobile
+            onKeyDown={(e) => { // For keyboard accessibility
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
                 handleTriggerInteraction();
@@ -95,6 +100,7 @@ export function WordHoverTranslate({ word, className }: WordHoverTranslateProps)
             role="button"
             aria-expanded={isTooltipOpen}
             aria-label={`Çevir: ${word}`}
+            tabIndex={0} // Make it focusable
           >
             {word}
           </span>
@@ -102,8 +108,7 @@ export function WordHoverTranslate({ word, className }: WordHoverTranslateProps)
         <TooltipContent className="max-w-xs shadow-lg">
           {isLoading && <span className="text-xs">Çevriliyor...</span>}
           {!isLoading && translatedWord && <span className="text-sm font-medium">{translatedWord}</span>}
-          {!isLoading && error && <span className="text-xs text-destructive">{error}</span>}
-          {!isLoading && !translatedWord && !error && tooltipMessage && (
+          {!isLoading && !translatedWord && tooltipMessage && (
             <span className="text-xs">{tooltipMessage}</span>
           )}
         </TooltipContent>
