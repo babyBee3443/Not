@@ -9,7 +9,7 @@ import { NoteDisplay } from '@/components/note-display';
 import { generateBiologyNote, type GenerateBiologyNoteOutput } from '@/ai/flows/generate-biology-note-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import { Terminal, Loader2 } from "lucide-react";
 
 export default function NotesPage() {
   const [isLoading, setIsLoading] = React.useState(false);
