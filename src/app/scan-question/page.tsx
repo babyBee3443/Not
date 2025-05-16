@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useToast } from '@/hooks/use-toast';
-import { Camera, ImageUp, RefreshCcw, ScanSearch, CheckCircle, XCircle, VideoOff, Loader2, Lightbulb, MessageSquare, HelpCircleIcon } from 'lucide-react';
+import { /*Camera,*/ ImageUp, RefreshCcw, ScanSearch, CheckCircle, XCircle, /*VideoOff,*/ Loader2, Lightbulb, MessageSquare, HelpCircleIcon } from 'lucide-react';
 import Image from 'next/image';
 import { ScrollToTopButton } from '@/components/scroll-to-top-button';
 import { solveImageQuestion, type SolveImageQuestionOutput } from '@/ai/flows/solve-image-question-flow';
@@ -18,7 +18,7 @@ type Mode = 'select' | 'camera' | 'upload' | 'preview' | 'results';
 
 export default function ScanQuestionPage() {
   const [mode, setMode] = React.useState<Mode>('select');
-  const [hasCameraPermission, setHasCameraPermission] = React.useState<boolean | null>(null);
+  // const [hasCameraPermission, setHasCameraPermission] = React.useState<boolean | null>(null); // Kamera kodu yorum satırına alındı
   const [imageSrc, setImageSrc] = React.useState<string | null>(null);
   const [isProcessingAi, setIsProcessingAi] = React.useState(false);
   const [aiResults, setAiResults] = React.useState<SolveImageQuestionOutput | null>(null);
@@ -26,11 +26,12 @@ export default function ScanQuestionPage() {
   const [showFeedbackForm, setShowFeedbackForm] = React.useState(false);
   const [feedbackText, setFeedbackText] = React.useState('');
   
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  // const videoRef = React.useRef<HTMLVideoElement>(null); // Kamera kodu yorum satırına alındı
+  // const canvasRef = React.useRef<HTMLCanvasElement>(null); // Kamera kodu yorum satırına alındı
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  /* // Kamera ile ilgili useEffect yorum satırına alındı
   React.useEffect(() => {
     if (mode === 'camera') {
       const getCameraPermission = async () => {
@@ -79,7 +80,9 @@ export default function ScanQuestionPage() {
       };
     }
   }, [mode, toast]);
+  */
 
+  /* // Kamera ile ilgili handleCaptureImage fonksiyonu yorum satırına alındı
   const handleCaptureImage = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -106,6 +109,7 @@ export default function ScanQuestionPage() {
       }
     }
   };
+  */
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -197,7 +201,7 @@ export default function ScanQuestionPage() {
                   Biyoloji sorunuzun fotoğrafını galeriden yükleyin, yapay zeka sizin için çözsün ve açıklasın!
                 </p>
               </div>
-            {/* <Button onClick={() => setMode('camera')} className="w-full text-lg py-6" variant="default">
+            {/* <Button onClick={() => setMode('camera')} className="w-full text-lg py-6" variant="default"> // Kamera butonu yorum satırına alındı
               <Camera className="mr-2 h-6 w-6" /> Kamerayı Kullan
             </Button> */}
             <Button onClick={() => fileInputRef.current?.click()} className="w-full text-lg py-6" variant="secondary">
@@ -210,8 +214,16 @@ export default function ScanQuestionPage() {
               onChange={handleFileUpload}
               className="hidden"
             />
+             {error && mode === 'select' && ( // Show general errors in select mode if any
+                <Alert variant="destructive" className="mt-4">
+                    <XCircle className="h-4 w-4" />
+                    <AlertTitle>Bir Hata Oluştu</AlertTitle>
+                    <AlertDescription>{error}</AlertDescription>
+                </Alert>
+            )}
           </div>
         );
+      /* // Kamera modu case bloğu yorum satırına alındı
       case 'camera':
         if (hasCameraPermission === null) {
           return (
@@ -265,6 +277,7 @@ export default function ScanQuestionPage() {
             )}
           </div>
         );
+      */
       case 'preview':
         return (
           <div className="space-y-6 flex flex-col items-center">
@@ -390,7 +403,21 @@ export default function ScanQuestionPage() {
                 </div>
             );
       default:
-        return null;
+        // Eğer mode 'camera' ise ve yorum satırında olduğu için bu case'e girerse,
+        // kullanıcıyı 'select' moduna yönlendirerek bir hata oluşmasını engelleyelim.
+        if (mode === 'camera') {
+            setMode('select');
+            return null; 
+        }
+        return (
+            <Alert variant="destructive">
+                <XCircle className="h-4 w-4" />
+                <AlertTitle>Beklenmedik Durum</AlertTitle>
+                <AlertDescription>
+                    Uygulama beklenmedik bir durumla karşılaştı. Lütfen sayfayı yenileyin veya ana sayfaya dönün.
+                </AlertDescription>
+            </Alert>
+        );
     }
   };
 
