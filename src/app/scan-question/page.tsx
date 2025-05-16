@@ -120,7 +120,7 @@ export default function ScanQuestionPage() {
         return (
           <div className="space-y-4">
              <div className="text-center mb-8">
-                <ScanLine className="h-16 w-16 text-primary mx-auto mb-4" />
+                <ScanSearch className="h-16 w-16 text-primary mx-auto mb-4" />
                 <h1 className="text-3xl font-bold text-primary">Soru Tara ve Çözdür</h1>
                 <p className="text-muted-foreground mt-2">
                   Biyoloji sorunuzun fotoğrafını çekin veya galeriden yükleyin, yapay zeka sizin için çözsün ve açıklasın!
