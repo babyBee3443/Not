@@ -9,5 +9,6 @@ import '@/ai/flows/translate-english-to-turkish.ts';
 import '@/ai/flows/translate-english-word-flow.ts';
 import '@/ai/flows/generate-biology-note-flow.ts';
 import '@/ai/flows/generate-biology-test-flow.ts';
-import '@/ai/flows/generate-fill-blank-flow.ts'; // Yeni akışı ekledik
+import '@/ai/flows/generate-fill-blank-flow.ts';
+import '@/ai/flows/solve-image-question-flow.ts'; // Yeni akışı ekledik
 
