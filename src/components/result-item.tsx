@@ -107,20 +107,23 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
   const isContentLikelyEnglishAndNotOriginalInput = content && (title !== "Orijinal Girdi (Türkçe)");
 
   const renderedContent = useMemo(() => {
-    if (!content || !isContentLikelyEnglishAndNotOriginalInput) {
-      return <p className={`text-base leading-relaxed whitespace-pre-wrap ${isTerm ? 'text-lg font-semibold' : ''}`}>{content || ""}</p>;
+    if (!content) {
+      return <div className={`text-base leading-relaxed whitespace-pre-wrap ${isTerm ? 'text-lg font-semibold' : ''}`}></div>;
+    }
+    if (!isContentLikelyEnglishAndNotOriginalInput) {
+      return <div className={`text-base leading-relaxed whitespace-pre-wrap ${isTerm ? 'text-lg font-semibold' : ''}`}>{content}</div>;
     }
     const segments = content.match(/([a-zA-Z0-9'-]+)|([^a-zA-Z0-9'-]+)/g) || [];
     
     return (
-      <p className={`text-base leading-relaxed whitespace-pre-wrap ${isTerm ? 'text-lg font-semibold' : ''}`}>
+      <div className={`text-base leading-relaxed whitespace-pre-wrap ${isTerm ? 'text-lg font-semibold' : ''}`}>
         {segments.map((segment, index) => {
           if (/[a-zA-Z]/.test(segment) && segment.length > 1) { 
             return <WordHoverTranslate key={`${index}-${segment}`} word={segment} />;
           }
           return <span key={`${index}-${segment}`}>{segment}</span>;
         })}
-      </p>
+      </div>
     );
   }, [content, isContentLikelyEnglishAndNotOriginalInput, isTerm]);
 
