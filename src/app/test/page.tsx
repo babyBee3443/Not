@@ -18,7 +18,7 @@ export default function TestPage() {
 
   const handleFormSubmit = async (values: TestFormValues) => {
     setIsLoading(true);
-    setTestData(null); // Clear previous test data
+    setTestData(null); 
     setError(null);
 
     try {
@@ -31,7 +31,7 @@ export default function TestPage() {
       setTestData(result);
       toast({
         title: "Test Oluşturuldu!",
-        description: `"${values.topic}" konusu için ${values.numberOfQuestions} soruluk test başarıyla oluşturuldu.`,
+        description: `"${values.topic || 'Genel'}" konusu için ${values.numberOfQuestions} soruluk test başarıyla oluşturuldu.`,
       });
     } catch (err) {
       console.error("Error generating test:", err);
@@ -50,10 +50,9 @@ export default function TestPage() {
     }
   };
 
-  // Allow resetting to form view from TestDisplay
   const handleResetToForm = () => {
     setTestData(null);
-    setError(null); // Also clear any previous error
+    setError(null); 
   };
 
   return (
@@ -74,7 +73,7 @@ export default function TestPage() {
             </div>
           ) : null}
 
-          {error && !testData && ( // Show error only if no test data is displayed
+          {error && !testData && ( 
             <Alert variant="destructive">
               <Terminal className="h-4 w-4" />
               <AlertTitle>Test Oluşturma Hatası</AlertTitle>

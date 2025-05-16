@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 interface TestDisplayProps {
   testData: GenerateBiologyTestOutput;
-  onResetTest?: () => void; // New prop
+  onResetTest?: () => void;
 }
 
 export function TestDisplay({ testData, onResetTest }: TestDisplayProps) {
@@ -42,7 +42,6 @@ export function TestDisplay({ testData, onResetTest }: TestDisplayProps) {
     });
   };
 
-  // Reset state when testData changes (new test loaded)
   React.useEffect(() => {
     setSelectedAnswers({});
     setIsSubmitted(false);
@@ -137,26 +136,30 @@ export function TestDisplay({ testData, onResetTest }: TestDisplayProps) {
             </Card>
           ))}
         </CardContent>
-        {!isSubmitted && (
-          <CardFooter className="p-6 border-t">
-            <Button 
-              onClick={handleSubmitTest} 
-              disabled={!allQuestionsAnswered || isSubmitted} 
-              className="w-full sm:w-auto text-lg py-3 px-8"
-            >
-              Testi Bitir ve Kontrol Et
-            </Button>
-          </CardFooter>
-        )}
-         {isSubmitted && (
-            <CardFooter className="p-6 border-t flex-col items-center gap-2">
-                <p className="text-xl font-bold text-primary">Test Tamamlandı!</p>
-                <p className="text-lg text-foreground">Skorunuz: <span className="font-bold">{score} / {testData.questions.length}</span></p>
-                <Button onClick={handleCreateNewTest} variant="outline" className="mt-4">
-                    Yeni Test Oluştur (Forma Dön)
-                </Button>
-            </CardFooter>
-        )}
+        <CardFooter className="p-6 border-t">
+          {!isSubmitted ? (
+            <div className="flex flex-col sm:flex-row w-full justify-between items-center gap-3">
+              <Button onClick={handleCreateNewTest} variant="outline" className="w-full sm:w-auto">
+                Forma Dön (Yeni Test)
+              </Button>
+              <Button 
+                onClick={handleSubmitTest} 
+                disabled={!allQuestionsAnswered} 
+                className="w-full sm:w-auto text-lg py-3"
+              >
+                Testi Bitir ve Kontrol Et
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2 w-full">
+              <p className="text-xl font-bold text-primary">Test Tamamlandı!</p>
+              <p className="text-lg text-foreground">Skorunuz: <span className="font-bold">{score} / {testData.questions.length}</span></p>
+              <Button onClick={handleCreateNewTest} variant="outline" className="mt-4">
+                  Yeni Test Oluştur (Forma Dön)
+              </Button>
+            </div>
+          )}
+        </CardFooter>
       </Card>
     </div>
   );
