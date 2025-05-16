@@ -118,7 +118,7 @@ export default function ScanQuestionPage() {
       const result = await solveImageQuestion({ imageDataUri: imageSrc });
       setAiResults(result);
       if (result.isBiologyQuestion) {
-        setError(null); // Clear previous errors if successful
+        setError(null); 
         toast({ title: "Soru Çözüldü!", description: "Yapay zeka sorunuzu analiz etti ve çözüm üretti." });
         setMode('results');
       } else {
@@ -226,14 +226,14 @@ export default function ScanQuestionPage() {
             </Button>
             {error && (
                 <Alert 
-                  variant={aiResults && !aiResults.isBiologyQuestion ? "default" : "destructive"} 
+                  variant={(aiResults && !aiResults.isBiologyQuestion) || (error && error.includes("tanımlanamadı")) ? "default" : "destructive"} 
                   className="w-full max-w-md"
                 >
-                    {aiResults && !aiResults.isBiologyQuestion 
+                    {(aiResults && !aiResults.isBiologyQuestion) || (error && error.includes("tanımlanamadı"))
                         ? <HelpCircleIcon className="h-4 w-4" /> 
                         : <XCircle className="h-4 w-4" />}
                     <AlertTitle>
-                        {aiResults && !aiResults.isBiologyQuestion 
+                        {(aiResults && !aiResults.isBiologyQuestion) || (error && error.includes("tanımlanamadı"))
                             ? "Soru Tanımlanamadı" 
                             : "İşlem Hatası"}
                     </AlertTitle>
@@ -243,9 +243,31 @@ export default function ScanQuestionPage() {
           </div>
         );
         case 'results':
-            if (!aiResults) {
-                return <Button onClick={handleRetakeOrUploadAnother}>Yeni Soru Tara</Button>;
+            if (!aiResults) { // Should not happen if mode is 'results' but good for safety
+                return (
+                  <div className="space-y-4 flex flex-col items-center">
+                    <p>Sonuçlar yüklenirken bir sorun oluştu.</p>
+                    <Button onClick={handleRetakeOrUploadAnother} variant="outline">Yeni Soru Tara</Button>
+                  </div>
+                );
             }
+            // This check is now redundant here as we only switch to 'results' if isBiologyQuestion is true.
+            // Kept for robustness in case of direct state manipulation in future.
+            if (!aiResults.isBiologyQuestion) {
+                 return (
+                    <div className="space-y-4 flex flex-col items-center">
+                        <Alert variant="default" className="w-full max-w-md">
+                            <HelpCircleIcon className="h-4 w-4" />
+                            <AlertTitle>Soru Tanımlanamadı</AlertTitle>
+                            <AlertDescription>{aiResults.explanation || "Görüntü bir biyoloji sorusu olarak tanımlanamadı."}</AlertDescription>
+                        </Alert>
+                        <Button onClick={handleRetakeOrUploadAnother} variant="outline" className="w-full max-w-md">
+                            <RefreshCcw className="mr-2 h-5 w-5" /> Başka Bir Soru Dene
+                        </Button>
+                    </div>
+                );
+            }
+
             return (
                 <div className="space-y-6">
                     <h2 className="text-2xl font-bold text-primary text-center">Yapay Zeka Çözümü</h2>
@@ -307,6 +329,5 @@ export default function ScanQuestionPage() {
     </div>
   );
 }
-
 
     
