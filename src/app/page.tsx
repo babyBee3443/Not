@@ -16,12 +16,14 @@ import type { AIResults, HistoryEntry, ExplanationMode } from '@/lib/types';
 import { translateSentence } from '@/ai/flows/translate-sentence';
 import { translateTerm } from '@/ai/flows/translate-term';
 import { explainTerm } from '@/ai/flows/explain-term';
-import { History as HistoryIcon, Star, Trash2, Languages, Search, Printer } from 'lucide-react';
+import { translateEnglishToTurkish } from '@/ai/flows/translate-english-to-turkish';
+import { History as HistoryIcon, Star, Trash2, Languages, Search, Printer, Loader2 } from 'lucide-react';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
 export default function BioLinguaLearnPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isPrintingPdf, setIsPrintingPdf] = useState(false);
   const [currentResults, setCurrentResults] = useState<AIResults | undefined>(undefined);
   const [currentInput, setCurrentInput] = useState<InputFormValues | undefined>(undefined);
   
@@ -137,7 +139,7 @@ export default function BioLinguaLearnPage() {
     toast({ title: "Favoriler Temizlendi" });
   };
 
-  const handlePrintToPdf = () => {
+  const handlePrintToPdf = async () => {
     if (!currentResults || !currentInput) {
         toast({
             title: "PDF Oluşturulamadı",
@@ -146,6 +148,47 @@ export default function BioLinguaLearnPage() {
         });
         return;
     }
+    setIsPrintingPdf(true);
+
+    const fetchedTurkishTranslations: {
+      term?: string;
+      sentence?: string;
+      definition?: string;
+      explanation?: string;
+    } = {};
+
+    const translationPromises = [];
+
+    if (currentResults.englishTerm) {
+      translationPromises.push(
+        translateEnglishToTurkish({ englishText: currentResults.englishTerm })
+          .then(res => { fetchedTurkishTranslations.term = res.turkishText; })
+          .catch(err => { console.error("PDF için terim çevirme hatası:", err); fetchedTurkishTranslations.term = "Çeviri alınamadı."; })
+      );
+    }
+    if (currentResults.englishSentence) {
+      translationPromises.push(
+        translateEnglishToTurkish({ englishText: currentResults.englishSentence })
+          .then(res => { fetchedTurkishTranslations.sentence = res.turkishText; })
+          .catch(err => { console.error("PDF için cümle çevirme hatası:", err); fetchedTurkishTranslations.sentence = "Çeviri alınamadı."; })
+      );
+    }
+    if (currentResults.definition) {
+      translationPromises.push(
+        translateEnglishToTurkish({ englishText: currentResults.definition })
+          .then(res => { fetchedTurkishTranslations.definition = res.turkishText; })
+          .catch(err => { console.error("PDF için tanım çevirme hatası:", err); fetchedTurkishTranslations.definition = "Çeviri alınamadı."; })
+      );
+    }
+    if (currentResults.explanation) {
+      translationPromises.push(
+        translateEnglishToTurkish({ englishText: currentResults.explanation })
+          .then(res => { fetchedTurkishTranslations.explanation = res.turkishText; })
+          .catch(err => { console.error("PDF için açıklama çevirme hatası:", err); fetchedTurkishTranslations.explanation = "Çeviri alınamadı."; })
+      );
+    }
+
+    await Promise.allSettled(translationPromises);
 
     const printWindow = window.open('', '_blank');
     if (printWindow) {
@@ -168,12 +211,14 @@ export default function BioLinguaLearnPage() {
                     h1 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 20px; font-size: 24px; }
                     .section { margin-bottom: 25px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
                     .section-title { font-weight: bold; color: #007bff; margin-bottom: 8px; font-size: 18px; }
+                    .translation-title { font-weight: bold; color: #28a745; margin-bottom: 5px; font-size: 16px; margin-top:10px; }
                     .content-text { white-space: pre-wrap; font-size: 16px; color: #444; }
                     @media print {
                         body { margin: 10mm; }
                         .section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
                         h1 { font-size: 20px; }
                         .section-title { font-size: 16px; }
+                        .translation-title { font-size: 14px; }
                         .content-text { font-size: 14px; }
                     }
                 </style>
@@ -192,6 +237,12 @@ export default function BioLinguaLearnPage() {
                 <div class="section">
                     <div class="section-title">İngilizce Terim:</div>
                     <div class="content-text">${escapeHtml(currentResults.englishTerm)}</div>
+                    ${fetchedTurkishTranslations.term ? `
+                        <div>
+                            <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
+                            <div class="content-text">${escapeHtml(fetchedTurkishTranslations.term)}</div>
+                        </div>
+                    ` : ''}
                 </div>
                 ` : ''}
 
@@ -199,6 +250,12 @@ export default function BioLinguaLearnPage() {
                 <div class="section">
                     <div class="section-title">Tam İngilizce Çeviri:</div>
                     <div class="content-text">${escapeHtml(currentResults.englishSentence)}</div>
+                     ${fetchedTurkishTranslations.sentence ? `
+                        <div>
+                            <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
+                            <div class="content-text">${escapeHtml(fetchedTurkishTranslations.sentence)}</div>
+                        </div>
+                    ` : ''}
                 </div>
                 ` : ''}
 
@@ -206,6 +263,12 @@ export default function BioLinguaLearnPage() {
                 <div class="section">
                     <div class="section-title">Tanım:</div>
                     <div class="content-text">${escapeHtml(currentResults.definition)}</div>
+                     ${fetchedTurkishTranslations.definition ? `
+                        <div>
+                            <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
+                            <div class="content-text">${escapeHtml(fetchedTurkishTranslations.definition)}</div>
+                        </div>
+                    ` : ''}
                 </div>
                 ` : ''}
 
@@ -213,14 +276,18 @@ export default function BioLinguaLearnPage() {
                 <div class="section">
                     <div class="section-title">Açıklama:</div>
                     <div class="content-text">${escapeHtml(currentResults.explanation)}</div>
+                     ${fetchedTurkishTranslations.explanation ? `
+                        <div>
+                            <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
+                            <div class="content-text">${escapeHtml(fetchedTurkishTranslations.explanation)}</div>
+                        </div>
+                    ` : ''}
                 </div>
                 ` : ''}
 
                 <script>
                     window.onload = function() {
                         window.print();
-                        // Kullanıcının yazdırma iletişim kutusunu veya yeni sekmeyi manuel olarak kapatmasına izin verin.
-                        // Otomatik kapatma sorunlu olabilir.
                     }
                 </script>
             </body>
@@ -234,6 +301,7 @@ export default function BioLinguaLearnPage() {
             variant: "destructive",
         });
     }
+    setIsPrintingPdf(false);
   };
 
 
@@ -279,10 +347,19 @@ export default function BioLinguaLearnPage() {
                    <Button 
                      variant="outline" 
                      onClick={handlePrintToPdf}
-                     disabled={!currentResults || isLoading}
+                     disabled={!currentResults || isLoading || isPrintingPdf}
                    >
-                     <Printer className="mr-2 h-4 w-4" />
-                     Sonuçları Yazdır
+                     {isPrintingPdf ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          PDF Oluşturuluyor...
+                        </>
+                      ) : (
+                        <>
+                          <Printer className="mr-2 h-4 w-4" />
+                          Sonuçları Yazdır
+                        </>
+                      )}
                    </Button>
                 </div>
               )}
@@ -388,6 +465,4 @@ export default function BioLinguaLearnPage() {
     </div>
   );
 }
-    
-
     
