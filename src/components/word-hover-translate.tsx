@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -59,10 +60,10 @@ export function WordHoverTranslate({ word, className }: WordHoverTranslateProps)
           </span>
         </TooltipTrigger>
         <TooltipContent className="max-w-xs shadow-lg">
-          {isLoading && <p className="text-xs">Çevriliyor...</p>}
-          {!isLoading && translatedWord && <p className="text-sm font-medium">{translatedWord}</p>}
-          {!isLoading && error && <p className="text-xs text-destructive">{error}</p>}
-          {!isLoading && !translatedWord && !error && <p className="text-xs">Çeviri için hazırlanıyor...</p>}
+          {isLoading && <span className="text-xs">Çevriliyor...</span>}
+          {!isLoading && translatedWord && <span className="text-sm font-medium">{translatedWord}</span>}
+          {!isLoading && error && <span className="text-xs text-destructive">{error}</span>}
+          {!isLoading && !translatedWord && !error && <span className="text-xs">Çeviri için hazırlanıyor...</span>}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
