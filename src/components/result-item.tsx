@@ -7,7 +7,8 @@ import { Copy, Check, Volume2, VolumeX, Eye, EyeOff, Loader2, Languages } from '
 import { useState, useEffect, useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { translateEnglishToTurkish } from '@/ai/flows/translate-english-to-turkish';
-import { WordHoverTranslate } from './word-hover-translate'; // Yeni bileşeni import et
+import { WordHoverTranslate } from './word-hover-translate';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ResultItemProps {
   title: string;
@@ -68,9 +69,8 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
 
   useEffect(() => {
     return () => {
-      // Component unmount olduğunda veya isSpeaking değiştiğinde konuşmayı durdur
       if (isSpeaking && typeof window !== 'undefined' && window.speechSynthesis && speechSynthesis.speaking) {
-        // speechSynthesis.cancel(); // Bu satır bazen "interrupted" hatalarına neden olabiliyor
+        // speechSynthesis.cancel(); // This line can cause "interrupted" errors if not handled carefully
       }
     };
   }, [isSpeaking]); 
@@ -110,19 +110,14 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
     if (!content || !isContentLikelyEnglishAndNotOriginalInput) {
       return <p className={`text-base leading-relaxed whitespace-pre-wrap ${isTerm ? 'text-lg font-semibold' : ''}`}>{content || ""}</p>;
     }
-    // Metni kelimelere ve noktalama işaretlerine ayır
-    // ([a-zA-Z'-]+) kelimeleri yakalar
-    // ([^a-zA-Z'-]+) kelime olmayanları (boşluk, noktalama) yakalar
     const segments = content.match(/([a-zA-Z0-9'-]+)|([^a-zA-Z0-9'-]+)/g) || [];
     
     return (
       <p className={`text-base leading-relaxed whitespace-pre-wrap ${isTerm ? 'text-lg font-semibold' : ''}`}>
         {segments.map((segment, index) => {
-          // Eğer segment bir kelime ise (harf içeriyorsa) WordHoverTranslate ile sar
-          if (/[a-zA-Z]/.test(segment) && segment.length > 1) { // Kelime olup olmadığını kontrol et (harf içermeli ve >1 karakter)
+          if (/[a-zA-Z]/.test(segment) && segment.length > 1) { 
             return <WordHoverTranslate key={`${index}-${segment}`} word={segment} />;
           }
-          // Değilse (boşluk, noktalama vb.) olduğu gibi bırak
           return <span key={`${index}-${segment}`}>{segment}</span>;
         })}
       </p>
@@ -209,3 +204,4 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
     </Card>
   );
 }
+
