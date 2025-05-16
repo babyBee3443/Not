@@ -53,6 +53,7 @@ export default function TestPage() {
   // Allow resetting to form view from TestDisplay
   const handleResetToForm = () => {
     setTestData(null);
+    setError(null); // Also clear any previous error
   };
 
   return (
@@ -88,10 +89,8 @@ export default function TestPage() {
              </div>
           )}
           
-          {/* Pass handleResetToForm to TestDisplay if you want a button inside TestDisplay to go back to form */}
-          {/* For now, the TestDisplay component's internal logic for "Yeni Test Oluştur" will clear its state and implicitly show the form again because testData becomes null */}
           {testData && !isLoading && (
-            <TestDisplay testData={testData} />
+            <TestDisplay testData={testData} onResetTest={handleResetToForm} />
           )}
         </div>
       </main>

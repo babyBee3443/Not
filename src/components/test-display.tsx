@@ -14,9 +14,10 @@ import { cn } from '@/lib/utils';
 
 interface TestDisplayProps {
   testData: GenerateBiologyTestOutput;
+  onResetTest?: () => void; // New prop
 }
 
-export function TestDisplay({ testData }: TestDisplayProps) {
+export function TestDisplay({ testData, onResetTest }: TestDisplayProps) {
   const [selectedAnswers, setSelectedAnswers] = React.useState<Record<number, number | null>>({});
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [score, setScore] = React.useState(0);
@@ -49,6 +50,15 @@ export function TestDisplay({ testData }: TestDisplayProps) {
   }, [testData]);
 
   const allQuestionsAnswered = testData.questions.length === Object.keys(selectedAnswers).filter(key => selectedAnswers[Number(key)] !== null).length;
+
+  const handleCreateNewTest = () => {
+    setSelectedAnswers({});
+    setIsSubmitted(false);
+    setScore(0);
+    if (onResetTest) {
+      onResetTest();
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-10 duration-500 mt-8">
@@ -142,7 +152,7 @@ export function TestDisplay({ testData }: TestDisplayProps) {
             <CardFooter className="p-6 border-t flex-col items-center gap-2">
                 <p className="text-xl font-bold text-primary">Test Tamamlandı!</p>
                 <p className="text-lg text-foreground">Skorunuz: <span className="font-bold">{score} / {testData.questions.length}</span></p>
-                <Button onClick={() => { setSelectedAnswers({}); setIsSubmitted(false); setScore(0); }} variant="outline" className="mt-4">
+                <Button onClick={handleCreateNewTest} variant="outline" className="mt-4">
                     Yeni Test Oluştur (Forma Dön)
                 </Button>
             </CardFooter>
