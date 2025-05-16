@@ -9,7 +9,7 @@ import { NoteDisplay } from '@/components/note-display';
 import { generateBiologyNote, type GenerateBiologyNoteOutput } from '@/ai/flows/generate-biology-note-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, Loader2 } from "lucide-react";
+import { Terminal, Loader2, BookOpen } from "lucide-react";
 
 export default function NotesPage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -27,7 +27,7 @@ export default function NotesPage() {
         topic: values.topic,
         gradeLevel: values.gradeLevel,
         tone: values.tone,
-        detailLevel: values.detailLevel, // Pass the new detailLevel
+        detailLevel: values.detailLevel,
       });
       setNoteData(result);
       toast({
@@ -36,7 +36,7 @@ export default function NotesPage() {
       });
     } catch (err) {
       console.error("Error generating note:", err);
-      let errorMessage = "Not oluşturulurken bir hata oluştu.";
+      let errorMessage = "Not oluşturulurken bir hata oluştu. Lütfen girdilerinizi kontrol edin veya daha sonra tekrar deneyin.";
       if (err instanceof Error) {
         errorMessage = err.message;
       }
@@ -57,10 +57,14 @@ export default function NotesPage() {
       <main className="container mx-auto py-8 px-4 md:px-6 lg:px-8 flex-1">
         <div className="mx-auto max-w-3xl space-y-8">
           <div>
-            <h1 className="text-3xl font-bold mb-2 text-center text-primary">Biyoloji Not Asistanı</h1>
-            <p className="text-center text-muted-foreground mb-6">
-              Yapay zeka destekli biyoloji öğretmeni ile öğrenmek istediğin konuyu gir, sana özel notlar hazırlasın!
-            </p>
+            <div className="text-center mb-8">
+              <BookOpen className="h-16 w-16 text-primary mx-auto mb-4" />
+              <h1 className="text-3xl font-bold text-primary">Biyoloji Not Asistanı</h1>
+              <p className="text-muted-foreground mt-2">
+                Yapay zeka destekli biyoloji öğretmeni ile öğrenmek istediğin konuyu gir, sana özel notlar hazırlasın!
+                Konu, sınıf seviyesi, anlatım tonu ve detay seviyesini seçerek öğrenme deneyimini kişiselleştir.
+              </p>
+            </div>
             <NoteForm onSubmit={handleFormSubmit} isLoading={isLoading} />
           </div>
 
@@ -73,9 +77,10 @@ export default function NotesPage() {
           )}
 
           {isLoading && !noteData && (
-             <div className="flex justify-center items-center py-10">
+             <div className="flex flex-col justify-center items-center py-10">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
-                <p className="ml-4 text-lg text-muted-foreground">Notunuz hazırlanıyor, lütfen bekleyin...</p>
+                <p className="ml-4 text-lg text-muted-foreground mt-4">Notunuz hazırlanıyor, bu işlem biraz zaman alabilir...</p>
+                <p className="text-sm text-muted-foreground mt-1">Lütfen bekleyin.</p>
              </div>
           )}
 
@@ -87,5 +92,3 @@ export default function NotesPage() {
     </div>
   );
 }
-
-    
