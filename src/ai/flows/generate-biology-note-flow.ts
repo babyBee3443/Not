@@ -3,7 +3,7 @@
 /**
  * @fileOverview Generates biology notes in Turkish, acting as a knowledgeable and engaging high school biology teacher.
  *
- * - generateBiologyNote - A function to generate biology notes based on a topic, grade level, and desired tone.
+ * - generateBiologyNote - A function to generate biology notes based on a topic, grade level, desired tone, and detail level.
  * - GenerateBiologyNoteInput - The input type for the generateBiologyNote function.
  * - GenerateBiologyNoteOutput - The return type for the generateBiologyNote function.
  */
@@ -14,19 +14,20 @@ import {z} from 'genkit';
 const GenerateBiologyNoteInputSchema = z.object({
   topic: z.string().describe('The biology topic for which the note is to be generated (e.g., "Hücre Organelleri", "Fotosentez").'),
   gradeLevel: z.enum(['9', '10', '11', '12']).describe("The student's grade level (9th, 10th, 11th, or 12th grade) to tailor the content to the Turkish high school biology curriculum."),
-  tone: z.enum(['Standard', 'Humorous', 'Engaging']).default('Engaging').describe('The desired tone for the note (e.g., "Standard", "Humorous", "Engaging").'),
+  tone: z.enum(['Standard', 'Humorous', 'Engaging', 'Dengeli']).default('Engaging').describe('The desired tone for the note (e.g., "Standard", "Humorous", "Engaging", "Dengeli").'),
+  detailLevel: z.enum(['Kısa Özet', 'Orta Detay', 'Tam Detay']).default('Orta Detay').describe('The desired level of detail for the note content ("Kısa Özet", "Orta Detay", "Tam Detay").'),
 });
 export type GenerateBiologyNoteInput = z.infer<typeof GenerateBiologyNoteInputSchema>;
 
 const GenerateBiologyNoteOutputSchema = z.object({
   title: z.string().describe('A catchy and relevant title for the biology note in Turkish.'),
-  content: z.string().describe('The main content of the biology note in Turkish. It should be engaging, easy to understand, and suitable for the specified grade level. It should reflect the persona of a fun and knowledgeable biology teacher.'),
+  content: z.string().describe('The main content of the biology note in Turkish. It should be engaging, easy to understand, and suitable for the specified grade level, tone, and detail level. It should reflect the persona of a fun and knowledgeable biology teacher.'),
   keyConcepts: z.array(z.string()).describe('A list of key concepts or terms related to the topic, in Turkish.'),
   interestingFact: z.string().describe('An interesting and engaging fact related to the topic, in Turkish.'),
   web2ToolSuggestion: z.object({
     name: z.string().describe('Name of a relevant Web 2.0 tool.'),
     description: z.string().describe('A brief description of how the tool can be used for the topic, in Turkish.'),
-    url: z.string().optional().describe('URL of the Web 2.0 tool, if available. This should be a valid web address starting with http:// or https://.'),
+    url: z.string().describe('URL of the Web 2.0 tool, if available. This should be a valid web address starting with http:// or https://.').optional(),
   }).optional().describe('A suggestion for a Web 2.0 tool that can be used to learn more about the topic. This should be a real and useful tool.'),
   summaryQuiz: z.object({
     question: z.string().describe('A short multiple-choice question in Turkish to summarize or check understanding of the topic.'),
@@ -51,18 +52,25 @@ You are a highly experienced and enthusiastic Turkish high school biology teache
 Your task is to generate a study note for a student based on the topic they provide. The note should be in TURKISH.
 
 Here are your guidelines:
-1.  **Persona**: Maintain a friendly, approachable, and slightly humorous tone (if 'Humorous' or 'Engaging' tone is selected). Be like a cool, knowledgeable teacher.
+1.  **Persona**: Maintain a friendly, approachable tone.
+    *   'Standard': Professional and clear.
+    *   'Humorous': Include light-hearted jokes or witty remarks relevant to the topic.
+    *   'Engaging': Use enthusiastic language, rhetorical questions, and relatable analogies.
+    *   'Dengeli': A balanced mix of professional clarity and engaging elements, avoiding excessive humor.
 2.  **Curriculum Adherence**: Ensure the content is accurate and appropriate for the specified 'gradeLevel' according to the Turkish Ministry of National Education (MEB) high school biology curriculum.
-3.  **Content (content)**:
-    *   Explain the 'topic' clearly and fluently. Use simple language where possible, but don't shy away from academic terms if necessary (explain them if they are complex for the grade level).
+3.  **Content (content) - Detail Level Adjustment**:
+    *   The main explanation of the 'topic' must be tailored to the 'detailLevel':
+        *   'Kısa Özet': Provide a very brief summary, covering only the absolute main points and definitions. Aim for conciseness.
+        *   'Orta Detay': Offer a more substantial explanation than a summary. Explain key concepts with some elaboration, but avoid going into excessive depth or highly complex related mechanisms.
+        *   'Tam Detay': Deliver a comprehensive and in-depth explanation. Explore the topic thoroughly, discuss mechanisms, and include relevant complexities suitable for the grade level.
+    *   Explain clearly and fluently. Use simple language where possible, but don't shy away from academic terms (explain them if they are complex for the grade level).
     *   Break down complex ideas into digestible parts.
-    *   Use analogies or real-world examples if they help in understanding.
 4.  **Title (title)**: Create a catchy and relevant title for the note.
 5.  **Key Concepts (keyConcepts)**: Identify and list 3-5 important key concepts or terms related to the topic.
 6.  **Interesting Fact (interestingFact)**: Include a fascinating and relevant biological fact that would pique a student's interest.
 7.  **Web 2.0 Tool Suggestion (web2ToolSuggestion)** (Optional but encouraged):
     *   If appropriate and useful for the topic, suggest a real Web 2.0 tool (like an interactive simulation website, a concept mapping tool, a biology-focused YouTube channel, etc.).
-    *   Briefly explain how the student can use this tool to enhance their learning for the given 'topic'. Provide a name, description, and URL if possible. Ensure the URL is a valid web address starting with http:// or https://.
+    *   Briefly explain how the student can use this tool to enhance their learning for the given 'topic'. Provide a name, description, and URL if possible. Ensure the URL is a valid web address.
 8.  **Summary Quiz (summaryQuiz)**:
     *   Create one multiple-choice question with four options to quickly test understanding of a core aspect of the topic.
     *   Clearly indicate the correct answer and provide a brief explanation for why it's correct.
@@ -72,6 +80,7 @@ Student's Request:
 Topic: {{{topic}}}
 Grade Level: {{{gradeLevel}}}
 Desired Tone: {{{tone}}}
+Desired Detail Level: {{{detailLevel}}}
 
 Please generate the note according to the output schema. Make it informative, engaging, and helpful for a Turkish high school student.
 `,
@@ -92,3 +101,4 @@ const generateBiologyNoteFlow = ai.defineFlow(
   }
 );
 
+    

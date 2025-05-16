@@ -12,13 +12,14 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import type { GenerateBiologyNoteInput } from '@/ai/flows/generate-biology-note-flow';
+// import type { GenerateBiologyNoteInput } from '@/ai/flows/generate-biology-note-flow'; // type import not strictly needed for form values
 import { Loader2, BookOpenText } from 'lucide-react';
 
 const noteFormSchema = z.object({
   topic: z.string().min(3, { message: 'Konu en az 3 karakter olmalıdır.' }).max(150, { message: 'Konu 150 karakteri aşamaz.' }),
   gradeLevel: z.enum(['9', '10', '11', '12'], { errorMap: () => ({ message: "Lütfen geçerli bir sınıf seviyesi seçin."}) }),
-  tone: z.enum(['Standard', 'Humorous', 'Engaging'], { errorMap: () => ({ message: "Lütfen geçerli bir anlatım tonu seçin."}) }),
+  tone: z.enum(['Standard', 'Humorous', 'Engaging', 'Dengeli'], { errorMap: () => ({ message: "Lütfen geçerli bir anlatım tonu seçin."}) }),
+  detailLevel: z.enum(['Kısa Özet', 'Orta Detay', 'Tam Detay'], { errorMap: () => ({ message: "Lütfen geçerli bir detay seviyesi seçin."}) }),
 });
 
 export type NoteFormValues = z.infer<typeof noteFormSchema>;
@@ -35,6 +36,7 @@ export function NoteForm({ onSubmit, isLoading }: NoteFormProps) {
       topic: '',
       gradeLevel: '9',
       tone: 'Engaging',
+      detailLevel: 'Orta Detay',
     },
   });
 
@@ -119,6 +121,12 @@ export function NoteForm({ onSubmit, isLoading }: NoteFormProps) {
                     </FormControl>
                     <Label className="font-normal">İlgi Çekici</Label>
                   </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0">
+                    <FormControl>
+                      <RadioGroupItem value="Dengeli" />
+                    </FormControl>
+                    <Label className="font-normal">Dengeli</Label>
+                  </FormItem>
                 </RadioGroup>
                 <FormDescription>Notun hangi üslupla hazırlanacağı.</FormDescription>
                 <FormMessage />
@@ -126,6 +134,43 @@ export function NoteForm({ onSubmit, isLoading }: NoteFormProps) {
             )}
           />
         </div>
+
+        <FormField
+            control={form.control}
+            name="detailLevel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-lg font-semibold">Açıklama Detayı</FormLabel>
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+                  disabled={isLoading}
+                >
+                  <FormItem className="flex items-center space-x-3 space-y-0 p-3 border rounded-md hover:bg-accent/50 transition-colors">
+                    <FormControl>
+                      <RadioGroupItem value="Kısa Özet" />
+                    </FormControl>
+                    <Label className="font-normal">Kısa Özet</Label>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0 p-3 border rounded-md hover:bg-accent/50 transition-colors">
+                    <FormControl>
+                      <RadioGroupItem value="Orta Detay" />
+                    </FormControl>
+                    <Label className="font-normal">Orta Detay</Label>
+                  </FormItem>
+                  <FormItem className="flex items-center space-x-3 space-y-0 p-3 border rounded-md hover:bg-accent/50 transition-colors">
+                    <FormControl>
+                      <RadioGroupItem value="Tam Detay" />
+                    </FormControl>
+                    <Label className="font-normal">Tam Detay</Label>
+                  </FormItem>
+                </RadioGroup>
+                <FormDescription>Not içeriğinin ne kadar detaylı olacağı.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         
         <Button 
           type="submit" 
@@ -148,3 +193,5 @@ export function NoteForm({ onSubmit, isLoading }: NoteFormProps) {
     </Form>
   );
 }
+
+    

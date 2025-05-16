@@ -27,6 +27,7 @@ export default function NotesPage() {
         topic: values.topic,
         gradeLevel: values.gradeLevel,
         tone: values.tone,
+        detailLevel: values.detailLevel, // Pass the new detailLevel
       });
       setNoteData(result);
       toast({
@@ -71,6 +72,13 @@ export default function NotesPage() {
             </Alert>
           )}
 
+          {isLoading && !noteData && (
+             <div className="flex justify-center items-center py-10">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <p className="ml-4 text-lg text-muted-foreground">Notunuz hazırlanıyor, lütfen bekleyin...</p>
+             </div>
+          )}
+
           {noteData && !isLoading && (
             <NoteDisplay noteData={noteData} />
           )}
@@ -79,3 +87,5 @@ export default function NotesPage() {
     </div>
   );
 }
+
+    
