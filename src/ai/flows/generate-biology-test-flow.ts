@@ -19,7 +19,7 @@ const QuestionItemSchema = z.object({
 });
 
 const GenerateBiologyTestInputSchema = z.object({
-  topic: z.string().describe('The biology topic(s) for which the test is to be generated. Can be a single topic (e.g., "Hücre Zarı"), comma-separated topics (e.g., "Fotosentez, Solunum"), or empty for a general test for the grade level.'),
+  topic: z.string().max(150, { message: 'Konu 150 karakteri aşamaz.' }).optional().describe('The biology topic(s) for which the test is to be generated. Can be a single topic (e.g., "Hücre Zarı"), comma-separated topics (e.g., "Fotosentez, Solunum"), or empty for a general test for the grade level.'),
   gradeLevel: z.enum(['9', '10', '11', '12']).describe("The student's grade level (9th, 10th, 11th, or 12th grade) to tailor the content to the Turkish high school biology curriculum."),
   difficultyLevel: z.enum(['Kolay', 'Orta', 'Zor']).default('Orta').describe('The desired difficulty level for the test questions ("Kolay", "Orta", "Zor").'),
   numberOfQuestions: z.number().min(1).max(10).default(5).describe('The number of questions to generate for the test (e.g., 5, 10). Maximum 10.'),
@@ -53,7 +53,7 @@ Number of Questions: {{{numberOfQuestions}}}
 
 Here are your guidelines:
 1.  **Topic Handling**:
-    *   If the 'topic' field is empty or not specific (e.g., general terms like "biyoloji"), generate a general biology test covering a broad range of concepts appropriate for the given 'gradeLevel'. The test title should reflect this (e.g., "9. Sınıf Genel Biyoloji Değerlendirme Testi").
+    *   If the 'topic' field is empty, generate a general biology test. This test must comprehensively cover a variety of subjects and concepts appropriate for the specified 'gradeLevel', strictly adhering to the Turkish Ministry of National Education (MEB) curriculum for that grade. The test title should clearly indicate it's a general test for that grade level (e.g., "9. Sınıf Genel Biyoloji Testi", "10. Sınıf Biyoloji Genel Değerlendirme").
     *   If the 'topic' field contains a single subject (e.g., "Hücre Organelleri"), focus the questions on that specific subject. The test title should be specific to this topic.
     *   If the 'topic' field contains multiple subjects separated by commas (e.g., "Fotosentez, Solunum, Enzimler"), create a mixed test with questions covering all listed subjects. The test title should reflect that it's a mixed test (e.g., "Fotosentez, Solunum ve Enzimler Karışık Testi").
 2.  **Curriculum Adherence**: All questions must be accurate and strictly align with the MEB curriculum for the specified 'gradeLevel' and 'topic'(s).
