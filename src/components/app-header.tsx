@@ -27,15 +27,7 @@ export function AppHeader() {
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggleButton />
-          <Button
-            variant="outline"
-            size="icon"
-            className="hidden md:inline-flex"
-            onClick={toggleSidebar}
-            aria-label="Kenar Çubuğunu Aç/Kapat"
-          >
-            <PanelLeft className="h-5 w-5" />
-          </Button>
+          {/* The desktop sidebar toggle button has been removed */}
         </div>
       </div>
     </header>
