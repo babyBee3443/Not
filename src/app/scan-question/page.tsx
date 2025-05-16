@@ -40,11 +40,9 @@ export default function ScanQuestionPage() {
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
 
-            // Attempt to apply continuous autofocus
             const videoTracks = stream.getVideoTracks();
             if (videoTracks.length > 0) {
               const track = videoTracks[0];
-              // Check if getCapabilities and focusMode are supported
               if (typeof track.getCapabilities === 'function') {
                 const capabilities = track.getCapabilities();
                 if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
@@ -173,9 +171,8 @@ export default function ScanQuestionPage() {
   };
 
   const handleFeedbackSubmit = () => {
-    // In a real app, you'd send this feedback to a server/database.
     console.log("Kullanıcı Geri Bildirimi:", {
-      image: imageSrc ? imageSrc.substring(0, 50) + "..." : "Yok", // Log a snippet of image URI
+      image: imageSrc ? imageSrc.substring(0, 50) + "..." : "Yok",
       aiResponse: aiResults,
       feedback: feedbackText
     });
@@ -245,7 +242,7 @@ export default function ScanQuestionPage() {
             <Button onClick={() => setMode('select')} variant="outline" className="w-full max-w-md">
                <XCircle className="mr-2 h-5 w-5" /> İptal
             </Button>
-             {hasCameraPermission === null && ( // Initial state before permission is known
+             {hasCameraPermission === null && ( 
                  <Alert variant="default">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <AlertTitle>Kamera İzni İsteniyor</AlertTitle>
@@ -254,7 +251,7 @@ export default function ScanQuestionPage() {
                     </AlertDescription>
                 </Alert>
             )}
-             {hasCameraPermission === false && ( // Explicitly denied
+             {hasCameraPermission === false && !error && ( 
                  <Alert variant="destructive">
                     <VideoOff className="h-4 w-4" />
                     <AlertTitle>Kamera Erişimi Gerekli</AlertTitle>
@@ -283,16 +280,16 @@ export default function ScanQuestionPage() {
             <Button onClick={handleRetakeOrUploadAnother} variant="outline" className="w-full max-w-md" disabled={isProcessingAi}>
               <RefreshCcw className="mr-2 h-5 w-5" /> Yeniden Çek / Başka Yükle
             </Button>
-            {error && ( // This error is from AI processing or other issues in 'preview'
+            {error && ( 
                 <Alert 
-                  variant={(aiResults && !aiResults.isBiologyQuestion) || (error && (error.includes("tanımlanamadı") || error.includes("algılanamadı") )) ? "default" : "destructive"} 
+                  variant={(aiResults && !aiResults.isBiologyQuestion) || (error && (error.includes("tanımlanamadı") || error.includes("algılanamadı") || error.includes("içermiyor") )) ? "default" : "destructive"} 
                   className="w-full max-w-md"
                 >
-                    {(aiResults && !aiResults.isBiologyQuestion) || (error && (error.includes("tanımlanamadı") || error.includes("algılanamadı") ))
+                    {(aiResults && !aiResults.isBiologyQuestion) || (error && (error.includes("tanımlanamadı") || error.includes("algılanamadı") || error.includes("içermiyor") ))
                         ? <HelpCircleIcon className="h-4 w-4" /> 
                         : <XCircle className="h-4 w-4" />}
                     <AlertTitle>
-                        {(aiResults && !aiResults.isBiologyQuestion) || (error && (error.includes("tanımlanamadı") || error.includes("algılanamadı") ))
+                        {(aiResults && !aiResults.isBiologyQuestion) || (error && (error.includes("tanımlanamadı") || error.includes("algılanamadı") || error.includes("içermiyor") ))
                             ? "Soru Tanımlanamadı" 
                             : "İşlem Hatası"}
                     </AlertTitle>
@@ -302,7 +299,7 @@ export default function ScanQuestionPage() {
           </div>
         );
         case 'results':
-            if (!aiResults) { // Should not happen if mode is 'results' but as a fallback
+            if (!aiResults) { 
                 return (
                   <div className="space-y-4 flex flex-col items-center">
                     <p>Sonuçlar yüklenirken bir sorun oluştu.</p>
@@ -314,7 +311,7 @@ export default function ScanQuestionPage() {
             return (
                 <div className="space-y-6">
                     <h2 className="text-2xl font-bold text-primary text-center">Yapay Zeka Çözümü</h2>
-                    {imageSrc && ( // Show the scanned image along with results
+                    {imageSrc && ( 
                         <Card className="overflow-hidden shadow-lg">
                             <CardHeader>
                                 <CardTitle>Taranan Soru Görüntüsü</CardTitle>
@@ -351,7 +348,7 @@ export default function ScanQuestionPage() {
                         </CardContent>
                     </Card>
 
-                    {aiResults.isBiologyQuestion && ( // Only show feedback if AI attempted to answer a biology question
+                    {aiResults.isBiologyQuestion && (
                       <Card className="mt-6 border-blue-500 dark:border-blue-400">
                         <CardHeader>
                           <CardTitle className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
@@ -406,7 +403,3 @@ export default function ScanQuestionPage() {
     </div>
   );
 }
-
-    
-
-    
