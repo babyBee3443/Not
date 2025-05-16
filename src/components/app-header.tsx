@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FlaskConical, BookOpenCheck, Newspaper, Menu, X } from 'lucide-react';
+import { FlaskConical, BookOpenCheck, Newspaper, Menu, X, BrainCircuit } from 'lucide-react'; // Added BrainCircuit for Exercises
 import { ThemeToggleButton } from '@/components/theme-toggle-button';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ export function AppHeader() {
     { href: '/', label: 'Çeviri', icon: FlaskConical },
     { href: '/notes', label: 'Not Oluştur', icon: BookOpenCheck },
     { href: '/test', label: 'Test Oluştur', icon: Newspaper },
+    { href: '/exercises', label: 'Alıştırmalar', icon: BrainCircuit }, // New exercises link
   ];
 
   return (
