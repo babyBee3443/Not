@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Lightbulb, ListChecks, BookMarked, Youtube, CheckCircle2, XCircle, HelpCircle, ExternalLink } from 'lucide-react';
+import { Lightbulb, ListChecks, BookMarked, Youtube, CheckCircle2, XCircle, HelpCircle, ExternalLink, Share2 } from 'lucide-react'; // Added Share2 for relationships
 import { useToast } from '@/hooks/use-toast';
 
 interface NoteDisplayProps {
@@ -84,6 +84,25 @@ export function NoteDisplay({ noteData }: NoteDisplayProps) {
             {noteData.keyConcepts.map((concept, index) => (
               <Badge key={index} variant="secondary" className="text-sm px-3 py-1">{concept}</Badge>
             ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {noteData.conceptRelationships && noteData.conceptRelationships.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Share2 className="h-6 w-6 text-primary" /> {/* Using Share2 icon for relationships */}
+              Kavram İlişkileri
+            </CardTitle>
+            <CardDescription>Bu konudaki önemli kavramlar arasındaki bazı ilişkiler:</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="list-disc pl-5 space-y-1 text-foreground/90">
+              {noteData.conceptRelationships.map((relationship, index) => (
+                <li key={index} className="text-sm">{relationship}</li>
+              ))}
+            </ul>
           </CardContent>
         </Card>
       )}
@@ -188,3 +207,4 @@ type FormControlProps = { children: React.ReactNode };
 function FormControl({ children }: FormControlProps) {
   return <div>{children}</div>;
 }
+

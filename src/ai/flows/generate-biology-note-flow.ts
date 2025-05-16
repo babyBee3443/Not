@@ -35,6 +35,7 @@ const GenerateBiologyNoteOutputSchema = z.object({
     correctAnswerIndex: z.number().min(0).max(3).describe('The 0-based index of the correct answer in the options array.'),
     explanation: z.string().describe('A brief explanation for the correct answer, in Turkish.'),
   }).describe('A simple multiple-choice quiz question to help reinforce learning.'),
+  conceptRelationships: z.array(z.string()).describe('A list of important relationships between key concepts, described as simple statements like "Kavram A ---ilişki---> Kavram B", in Turkish. Example: "Hücre Zarı ---madde alışverişini kontrol eder---> Sitoplazma".').optional(),
 });
 export type GenerateBiologyNoteOutput = z.infer<typeof GenerateBiologyNoteOutputSchema>;
 
@@ -56,7 +57,7 @@ Here are your guidelines:
     *   'Standard': Professional and clear.
     *   'Humorous': Include light-hearted jokes or witty remarks relevant to the topic.
     *   'Engaging': Use enthusiastic language, rhetorical questions, and relatable analogies.
-    *   'Dengeli': A balanced mix of professional clarity and engaging elements, avoiding excessive humor.
+    *   'Dengeli': A balanced mix of professional clarity and engaging elements, avoiding excessive humor. This tone aims for a teacher who is both knowledgeable and approachable, making learning enjoyable without being overly informal.
 2.  **Curriculum Adherence**: Ensure the content is accurate and appropriate for the specified 'gradeLevel'. Your information must strictly align with the current Turkish Ministry of National Education (MEB) high school biology curriculum, as reflected in the official 'Maarif' textbooks and resources (e.g., information accessible via mufredat.meb.gov.tr). Stay informed about any yearly updates to this curriculum.
 3.  **Content (content) - Detail Level Adjustment**:
     *   The main explanation of the 'topic' must be tailored to the 'detailLevel':
@@ -74,7 +75,12 @@ Here are your guidelines:
 8.  **Summary Quiz (summaryQuiz)**:
     *   Create one multiple-choice question with four options to quickly test understanding of a core aspect of the topic.
     *   Clearly indicate the correct answer and provide a brief explanation for why it's correct.
-9.  **Language**: All output MUST be in Turkish.
+9.  **Concept Relationships (conceptRelationships)** (Optional but highly encouraged):
+    *   Identify and list 2-4 key relationships between the 'keyConcepts' or other important terms within the 'topic'.
+    *   Describe these relationships as simple, clear statements in Turkish, ideally in a "Concept A ---relation---> Concept B" or "Concept A [ilişki fiili] Concept B" format.
+    *   Examples: "Mitokondri ---hücresel solunumla üretir---> ATP", "DNA ---kalıtsal bilgiyi taşır---> Protein Sentezi", "Enzimler ---reaksiyonları hızlandırır---> Substratlar".
+    *   These relationships should be fundamental to understanding the topic at the specified 'gradeLevel'.
+10. **Language**: All output MUST be in Turkish.
 
 Student's Request:
 Topic: {{{topic}}}
@@ -100,3 +106,4 @@ const generateBiologyNoteFlow = ai.defineFlow(
     return output;
   }
 );
+
