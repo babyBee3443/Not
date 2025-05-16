@@ -17,35 +17,26 @@ export function WordHoverTranslate({ word, className }: WordHoverTranslateProps)
   const [isTooltipOpen, setIsTooltipOpen] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  // This function is called when the tooltip is triggered to open.
-  // The primary checks (e.g., not already translated, not loading) are performed
-  // by the caller in `onOpenChange`.
   const fetchTranslation = async (wordToTranslate: string) => {
-    // Trim the word to handle potential leading/trailing whitespace.
     const trimmedWord = wordToTranslate.trim();
 
     if (!trimmedWord) {
-      // If the word is empty or just whitespace after trimming, no need to translate.
-      // Set translatedWord to the original to avoid repeated attempts.
       setTranslatedWord(wordToTranslate); 
       return;
     }
     
-    // Avoid translating very short words (single non-alpha) or numbers-only words.
-    // This prevents unnecessary API calls for punctuation, etc.
     if (trimmedWord.length <= 1 && !trimmedWord.match(/[a-zA-Z]/) ) {
-        setTranslatedWord(trimmedWord); // Show original if not conventionally translatable
+        setTranslatedWord(trimmedWord);
         return;
     }
-    if (/^\d+$/.test(trimmedWord)) { // Checks if the word consists only of digits
-        setTranslatedWord(trimmedWord); // Show original if just numbers
+    if (/^\d+$/.test(trimmedWord)) { 
+        setTranslatedWord(trimmedWord);
         return;
     }
 
     setIsLoading(true);
     setError(null);
     try {
-      // Use the trimmed word for translation.
       const result = await translateEnglishWordToTurkish({ englishWord: trimmedWord });
       setTranslatedWord(result.turkishWord);
     } catch (err) {
@@ -57,19 +48,43 @@ export function WordHoverTranslate({ word, className }: WordHoverTranslateProps)
     }
   };
 
+  const handleTriggerInteraction = () => {
+    // This will call onOpenChange because the `open` prop of Tooltip is bound to isTooltipOpen
+    setIsTooltipOpen(prev => !prev); 
+  };
+
   return (
-    <TooltipProvider delayDuration={300}>
-      <Tooltip open={isTooltipOpen} onOpenChange={(open) => {
-        setIsTooltipOpen(open);
-        // Fetch translation only when the tooltip is opening and we don't have a translation/error yet,
-        // and the component isn't already loading a translation.
-        if (open && !translatedWord && !isLoading && !error) {
-          fetchTranslation(word); // Pass the original word prop
-        }
-      }}>
+    <TooltipProvider>
+      <Tooltip 
+        open={isTooltipOpen} 
+        onOpenChange={(open) => {
+          setIsTooltipOpen(open);
+          // Fetch translation when the tooltip is programmatically opened or opened by hover/focus,
+          // and we don't have a translation yet, and not currently loading.
+          if (open && !translatedWord && !isLoading && !error) {
+            fetchTranslation(word);
+          }
+        }}
+      >
         <TooltipTrigger asChild>
-          {/* This span acts as the trigger. On mobile, tapping this span should open the tooltip. */}
-          <span className={cn("cursor-default hover:bg-accent/70 p-[1px] m-[-1px] rounded-sm transition-colors duration-150", className)}>
+          <span 
+            className={cn(
+              "hover:bg-accent/70 p-[1px] m-[-1px] rounded-sm transition-colors duration-150 outline-none", 
+              className,
+              isTooltipOpen ? "bg-accent/70" : "" // Optional: style when open
+            )}
+            tabIndex={0} 
+            onClick={handleTriggerInteraction}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleTriggerInteraction();
+              }
+            }}
+            role="button" // Improves semantics for screen readers
+            aria-expanded={isTooltipOpen}
+            aria-label={`Çevir: ${word}`}
+          >
             {word}
           </span>
         </TooltipTrigger>
@@ -84,4 +99,3 @@ export function WordHoverTranslate({ word, className }: WordHoverTranslateProps)
     </TooltipProvider>
   );
 }
-
