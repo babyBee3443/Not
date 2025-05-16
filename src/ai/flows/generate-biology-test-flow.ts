@@ -53,8 +53,8 @@ Number of Questions: {{{numberOfQuestions}}}
 
 Here are your guidelines:
 1.  **Topic Handling**:
-    *   If the 'topic' field is empty, generate a general biology test. This test must comprehensively cover a variety of subjects and concepts appropriate for the specified 'gradeLevel', strictly adhering to the Turkish Ministry of National Education (MEB) curriculum for that grade. The test title should clearly indicate it's a general test for that grade level (e.g., "9. Sınıf Genel Biyoloji Testi", "10. Sınıf Biyoloji Genel Değerlendirme").
-    *   If the 'topic' field contains a single subject (e.g., "Hücre Organelleri"), focus the questions on that specific subject. The test title should be specific to this topic.
+    *   If the 'topic' field is empty or not provided, you MUST generate a general biology test. This test must comprehensively cover a variety of subjects and concepts appropriate for the specified 'gradeLevel', strictly adhering to the Turkish Ministry of National Education (MEB) curriculum for that grade. The test title should clearly indicate it's a general test for that grade level (e.g., "9. Sınıf Genel Biyoloji Testi", "10. Sınıf Biyoloji Genel Değerlendirme Sınavı", "11. Sınıf Biyoloji Yıl Sonu Değerlendirmesi", "12. Sınıf Biyoloji Karma Test").
+    *   If the 'topic' field contains a single subject (e.g., "Hücre Organelleri"), focus the questions on that specific subject. The test title should be specific to this topic (e.g., "Hücre Organelleri Konu Testi").
     *   If the 'topic' field contains multiple subjects separated by commas (e.g., "Fotosentez, Solunum, Enzimler"), create a mixed test with questions covering all listed subjects. The test title should reflect that it's a mixed test (e.g., "Fotosentez, Solunum ve Enzimler Karışık Testi").
 2.  **Curriculum Adherence**: All questions must be accurate and strictly align with the MEB curriculum for the specified 'gradeLevel' and 'topic'(s).
 3.  **Difficulty Level ('difficultyLevel')**:
@@ -67,7 +67,7 @@ Here are your guidelines:
     *   'options': Four distinct multiple-choice options in Turkish. One option must be clearly correct, and the others should be plausible distractors, appropriate for the difficulty level. Avoid trick questions.
     *   'correctAnswerIndex': The 0-based index of the correct option.
     *   'explanation': A concise explanation in Turkish detailing why the correct answer is right and, if helpful, why common distractors might be wrong. The explanation should reinforce learning.
-6.  **Test Title ('testTitle')**: Create an appropriate and descriptive title for the test in Turkish, reflecting the topic handling guideline (e.g., "9. Sınıf Genel Biyoloji Testi", "Fotosentez ve Solunum Karışık Testi").
+6.  **Test Title ('testTitle')**: Create an appropriate and descriptive title for the test in Turkish, reflecting the topic handling guideline.
 7.  **Language**: All output MUST be in Turkish.
 
 Please generate the test strictly according to the output schema. Ensure all questions are unique and test different aspects of the topic(s) where possible.
