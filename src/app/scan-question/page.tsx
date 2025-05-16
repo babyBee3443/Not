@@ -12,7 +12,7 @@ import { Camera, ImageUp, RefreshCcw, ScanSearch, CheckCircle, XCircle, VideoOff
 import Image from 'next/image';
 import { ScrollToTopButton } from '@/components/scroll-to-top-button';
 import { solveImageQuestion, type SolveImageQuestionOutput } from '@/ai/flows/solve-image-question-flow';
-import { Textarea } from '@/components/ui/textarea'; // Added Textarea import
+import { Textarea } from '@/components/ui/textarea';
 
 type Mode = 'select' | 'camera' | 'upload' | 'preview' | 'results';
 
@@ -23,8 +23,8 @@ export default function ScanQuestionPage() {
   const [isProcessingAi, setIsProcessingAi] = React.useState(false);
   const [aiResults, setAiResults] = React.useState<SolveImageQuestionOutput | null>(null);
   const [error, setError] = React.useState<string | null>(null);
-  const [showFeedbackForm, setShowFeedbackForm] = React.useState(false); // State for feedback form
-  const [feedbackText, setFeedbackText] = React.useState(''); // State for feedback text
+  const [showFeedbackForm, setShowFeedbackForm] = React.useState(false);
+  const [feedbackText, setFeedbackText] = React.useState('');
   
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -39,6 +39,25 @@ export default function ScanQuestionPage() {
           setHasCameraPermission(true);
           if (videoRef.current) {
             videoRef.current.srcObject = stream;
+
+            // Attempt to apply continuous autofocus
+            const videoTracks = stream.getVideoTracks();
+            if (videoTracks.length > 0) {
+              const track = videoTracks[0];
+              // Check if getCapabilities and focusMode are supported
+              if (typeof track.getCapabilities === 'function') {
+                const capabilities = track.getCapabilities();
+                if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+                  track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] })
+                    .then(() => console.log("Applied continuous focus mode."))
+                    .catch(e => console.warn("Could not apply continuous focus mode:", e));
+                } else {
+                  console.log("Continuous focus mode not supported by this camera/browser.");
+                }
+              } else {
+                console.log("track.getCapabilities() not supported by this browser.");
+              }
+            }
           }
         } catch (err) {
           console.error('Kamera erişim hatası:', err);
@@ -75,7 +94,7 @@ export default function ScanQuestionPage() {
         setImageSrc(dataUrl);
         setAiResults(null); 
         setError(null);
-        setShowFeedbackForm(false); // Reset feedback form
+        setShowFeedbackForm(false);
         setFeedbackText('');
         setMode('preview');
         if (videoRef.current && videoRef.current.srcObject) {
@@ -97,7 +116,7 @@ export default function ScanQuestionPage() {
         setImageSrc(e.target?.result as string);
         setAiResults(null); 
         setError(null);
-        setShowFeedbackForm(false); // Reset feedback form
+        setShowFeedbackForm(false);
         setFeedbackText('');
         setMode('preview');
       };
@@ -150,7 +169,7 @@ export default function ScanQuestionPage() {
 
   const handleToggleFeedbackForm = () => {
     setShowFeedbackForm(prev => !prev);
-    if (showFeedbackForm) setFeedbackText(''); // Clear text if closing
+    if (showFeedbackForm) setFeedbackText('');
   };
 
   const handleFeedbackSubmit = () => {
@@ -161,7 +180,6 @@ export default function ScanQuestionPage() {
     });
     setFeedbackText('');
     setShowFeedbackForm(false);
-    // Here you would typically send the feedback to a backend service
   };
   
   const renderContent = () => {
@@ -319,7 +337,6 @@ export default function ScanQuestionPage() {
                         </CardContent>
                     </Card>
 
-                    {/* Feedback Section */}
                     {aiResults.isBiologyQuestion && (
                       <Card className="mt-6 border-blue-500 dark:border-blue-400">
                         <CardHeader>
