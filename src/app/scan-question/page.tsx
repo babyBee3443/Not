@@ -278,11 +278,11 @@ export default function ScanQuestionPage() {
                             <p className="text-foreground/90 whitespace-pre-wrap">{aiResults.explanation}</p>
                         </CardContent>
                     </Card>
-                     {error && ( // Display general errors again if any specific to this stage
+                     {error && !aiResults.isBiologyQuestion && ( // Show specific error if not a biology question based on AI
                         <Alert variant="destructive" className="w-full">
                             <XCircle className="h-4 w-4" />
-                            <AlertTitle>Hata</AlertTitle>
-                            <AlertDescription>{error}</AlertDescription>
+                            <AlertTitle>Soru Tanımlanamadı</AlertTitle>
+                            <AlertDescription>{aiResults.explanation || "Görüntü bir biyoloji sorusu olarak tanımlanamadı veya net değil."}</AlertDescription>
                         </Alert>
                     )}
                     <Button onClick={handleRetakeOrUploadAnother} variant="default" className="w-full text-lg py-3">
