@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Volume2, VolumeX } from 'lucide-react';
+import { Copy, Check, Volume2, VolumeX, Languages, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,6 +18,7 @@ interface ResultItemProps {
 export function ResultItem({ title, content, isLoading = false, isTerm = false, turkishEquivalent }: ResultItemProps) {
   const [copied, setCopied] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showTurkish, setShowTurkish] = useState(false);
   const { toast } = useToast();
 
   const handleCopy = () => {
@@ -84,6 +85,9 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [content]);
 
+  const toggleShowTurkish = () => {
+    setShowTurkish(prev => !prev);
+  };
 
   return (
     <Card className={`shadow-lg ${isTerm ? 'border-primary border-2' : ''}`}>
@@ -111,9 +115,17 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
           <>
             <p className={`text-base leading-relaxed whitespace-pre-wrap ${isTerm ? 'text-2xl font-bold' : ''}`}>{content}</p>
             {turkishEquivalent && (
-              <div className="mt-3 pt-3 border-t border-border">
-                <p className="text-sm font-medium text-muted-foreground">Türkçe Orijinali:</p>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{turkishEquivalent}</p>
+              <div className="mt-4 pt-3 border-t border-border">
+                <Button variant="outline" size="sm" onClick={toggleShowTurkish} className="mb-2">
+                  {showTurkish ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
+                  {showTurkish ? "Türkçe Orijinalini Gizle" : "Türkçe Orijinalini Göster"}
+                </Button>
+                {showTurkish && (
+                  <div className="p-3 bg-muted/50 rounded-md">
+                    <p className="text-sm font-medium text-muted-foreground">Türkçe Orijinali:</p>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{turkishEquivalent}</p>
+                  </div>
+                )}
               </div>
             )}
           </>
