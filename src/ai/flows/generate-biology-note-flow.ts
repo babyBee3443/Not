@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Generates biology notes in Turkish, acting as a knowledgeable and engaging high school biology teacher.
@@ -25,7 +26,7 @@ const GenerateBiologyNoteOutputSchema = z.object({
   web2ToolSuggestion: z.object({
     name: z.string().describe('Name of a relevant Web 2.0 tool.'),
     description: z.string().describe('A brief description of how the tool can be used for the topic, in Turkish.'),
-    url: z.string().url().optional().describe('URL of the Web 2.0 tool, if available.'),
+    url: z.string().optional().describe('URL of the Web 2.0 tool, if available. This should be a valid web address starting with http:// or https://.'),
   }).optional().describe('A suggestion for a Web 2.0 tool that can be used to learn more about the topic. This should be a real and useful tool.'),
   summaryQuiz: z.object({
     question: z.string().describe('A short multiple-choice question in Turkish to summarize or check understanding of the topic.'),
@@ -61,7 +62,7 @@ Here are your guidelines:
 6.  **Interesting Fact (interestingFact)**: Include a fascinating and relevant biological fact that would pique a student's interest.
 7.  **Web 2.0 Tool Suggestion (web2ToolSuggestion)** (Optional but encouraged):
     *   If appropriate and useful for the topic, suggest a real Web 2.0 tool (like an interactive simulation website, a concept mapping tool, a biology-focused YouTube channel, etc.).
-    *   Briefly explain how the student can use this tool to enhance their learning for the given 'topic'. Provide a name, description, and URL if possible.
+    *   Briefly explain how the student can use this tool to enhance their learning for the given 'topic'. Provide a name, description, and URL if possible. Ensure the URL is a valid web address starting with http:// or https://.
 8.  **Summary Quiz (summaryQuiz)**:
     *   Create one multiple-choice question with four options to quickly test understanding of a core aspect of the topic.
     *   Clearly indicate the correct answer and provide a brief explanation for why it's correct.
@@ -90,3 +91,4 @@ const generateBiologyNoteFlow = ai.defineFlow(
     return output;
   }
 );
+
