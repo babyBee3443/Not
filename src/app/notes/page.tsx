@@ -10,6 +10,7 @@ import { generateBiologyNote, type GenerateBiologyNoteOutput } from '@/ai/flows/
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Terminal, Loader2, BookOpen } from "lucide-react";
+import { ScrollToTopButton } from '@/components/scroll-to-top-button';
 
 export default function NotesPage() {
   const [isLoading, setIsLoading] = React.useState(false);
@@ -89,6 +90,7 @@ export default function NotesPage() {
           )}
         </div>
       </main>
+      <ScrollToTopButton />
     </div>
   );
 }

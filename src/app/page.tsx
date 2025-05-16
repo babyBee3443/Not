@@ -18,6 +18,7 @@ import { translateTerm } from '@/ai/flows/translate-term';
 import { explainTerm } from '@/ai/flows/explain-term';
 import { translateEnglishToTurkish } from '@/ai/flows/translate-english-to-turkish';
 import { History as HistoryIcon, Star, Trash2, Languages, Search, Printer, Loader2, XCircle, Inbox, StarOff, SearchX } from 'lucide-react';
+import { ScrollToTopButton } from '@/components/scroll-to-top-button';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -379,7 +380,7 @@ export default function BioLinguaLearnPage() {
                       placeholder="Geçmişte ara..."
                       value={historySearchTerm}
                       onChange={(e) => setHistorySearchTerm(e.target.value)}
-                      className="pl-8 w-full pr-8" // Added pr-8 for clear button
+                      className="pl-8 w-full pr-8" 
                     />
                     {historySearchTerm && (
                       <Button 
@@ -437,7 +438,7 @@ export default function BioLinguaLearnPage() {
                         placeholder="Favorilerde ara..."
                         value={favoritesSearchTerm}
                         onChange={(e) => setFavoritesSearchTerm(e.target.value)}
-                        className="pl-8 w-full pr-8" // Added pr-8 for clear button
+                        className="pl-8 w-full pr-8" 
                       />
                        {favoritesSearchTerm && (
                         <Button 
@@ -487,6 +488,7 @@ export default function BioLinguaLearnPage() {
           </Tabs>
         </div>
       </main>
+      <ScrollToTopButton />
     </div>
   );
 }
