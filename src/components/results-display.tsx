@@ -15,12 +15,12 @@ export function ResultsDisplay({ results, isLoading, turkishInput }: ResultsDisp
   if (isLoading && !results) {
     return (
       <div className="space-y-6 mt-8">
-        <h2 className="text-2xl font-bold text-primary mb-4">Results</h2>
-        <ResultItem title="Original Input (Turkish)" isLoading={true} />
-        <ResultItem title="English Term" isLoading={true} isTerm={true} />
-        <ResultItem title="Full English Translation" isLoading={true} />
-        <ResultItem title="Definition" isLoading={true} />
-        <ResultItem title="Explanation" isLoading={true} />
+        <h2 className="text-2xl font-bold text-primary mb-4">Sonuçlar</h2>
+        <ResultItem title="Orijinal Girdi (Türkçe)" isLoading={true} />
+        <ResultItem title="İngilizce Terim" isLoading={true} isTerm={true} />
+        <ResultItem title="Tam İngilizce Çeviri" isLoading={true} />
+        <ResultItem title="Tanım" isLoading={true} />
+        <ResultItem title="Açıklama" isLoading={true} />
       </div>
     );
   }
@@ -34,37 +34,37 @@ export function ResultsDisplay({ results, isLoading, turkishInput }: ResultsDisp
       className="space-y-6 mt-8 animate-in fade-in slide-in-from-bottom-10 scale-in-95 duration-500 ease-out"
       key={turkishInput || 'initial-results-display'} 
     >
-      <h2 className="text-2xl font-bold text-primary mb-4">Results</h2>
+      <h2 className="text-2xl font-bold text-primary mb-4">Sonuçlar</h2>
       
       {turkishInput && (
         <ResultItem 
-          title="Original Input (Turkish)" 
+          title="Orijinal Girdi (Türkçe)" 
           content={turkishInput} 
           isLoading={isLoading && (!results || !results.englishTerm)} 
         />
       )}
       
       <ResultItem 
-        title="English Term" 
+        title="İngilizce Terim" 
         content={results?.englishTerm} 
         isLoading={isLoading && (!results || !results.englishTerm)} 
         isTerm={true} 
         turkishEquivalent={results?.englishTerm ? turkishInput : undefined}
       />
       <ResultItem 
-        title="Full English Translation" 
+        title="Tam İngilizce Çeviri" 
         content={results?.englishSentence} 
         isLoading={isLoading && (!results || !results.englishSentence)} 
         turkishEquivalent={results?.englishSentence ? turkishInput : undefined}
       />
       <ResultItem 
-        title="Definition" 
+        title="Tanım" 
         content={results?.definition} 
         isLoading={isLoading && (!results || !results.definition)} 
         turkishEquivalent={results?.definition ? turkishInput : undefined}
       />
       <ResultItem 
-        title="Explanation" 
+        title="Açıklama" 
         content={results?.explanation} 
         isLoading={isLoading && (!results || !results.explanation)} 
         turkishEquivalent={results?.explanation ? turkishInput : undefined}

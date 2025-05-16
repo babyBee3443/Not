@@ -11,8 +11,8 @@ interface ResultItemProps {
   title: string;
   content?: string;
   isLoading?: boolean;
-  isTerm?: boolean; // Special styling for the main term
-  turkishEquivalent?: string; // New prop for Turkish text
+  isTerm?: boolean;
+  turkishEquivalent?: string;
 }
 
 export function ResultItem({ title, content, isLoading = false, isTerm = false, turkishEquivalent }: ResultItemProps) {
@@ -24,14 +24,14 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
     if (content) {
       navigator.clipboard.writeText(content);
       setCopied(true);
-      toast({ title: "Copied to clipboard!", description: `${title} content copied.` });
+      toast({ title: "Panoya kopyalandı!", description: `${title} içeriği kopyalandı.` });
       setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const handleSpeak = () => {
     if (!content || typeof window === 'undefined' || !window.speechSynthesis) {
-      toast({ title: "Speech not available", description: "Your browser doesn't support text-to-speech.", variant: "destructive" });
+      toast({ title: "Konuşma özelliği mevcut değil", description: "Tarayıcınız metin okuma özelliğini desteklemiyor.", variant: "destructive" });
       return;
     }
 
@@ -57,7 +57,7 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
         console.warn("Speech synthesis interrupted. Code:", event.error, "Content length:", content?.length);
       } else {
         console.error("Speech synthesis error. Code:", event.error, "Content length:", content?.length);
-        toast({ title: "Speech Error", description: "Could not play audio.", variant: "destructive" });
+        toast({ title: "Konuşma Hatası", description: "Ses oynatılamadı.", variant: "destructive" });
       }
       setIsSpeaking(false);
     };
@@ -91,10 +91,10 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
         <CardTitle className={`text-xl font-semibold ${isTerm ? 'text-primary' : ''}`}>{title}</CardTitle>
         {content && !isLoading && (
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={handleCopy} aria-label={`Copy ${title}`}>
+            <Button variant="ghost" size="icon" onClick={handleCopy} aria-label={`${title} kopyala`}>
               {copied ? <Check className="h-5 w-5 text-green-500" /> : <Copy className="h-5 w-5" />}
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleSpeak} aria-label={`Speak ${title}`}>
+            <Button variant="ghost" size="icon" onClick={handleSpeak} aria-label={`${title} seslendir`}>
               {isSpeaking ? <VolumeX className="h-5 w-5 text-primary" /> : <Volume2 className="h-5 w-5" />}
             </Button>
           </div>
@@ -112,13 +112,13 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
             <p className={`text-base leading-relaxed whitespace-pre-wrap ${isTerm ? 'text-2xl font-bold' : ''}`}>{content}</p>
             {turkishEquivalent && (
               <div className="mt-3 pt-3 border-t border-border">
-                <p className="text-sm font-medium text-muted-foreground">Turkish Original:</p>
+                <p className="text-sm font-medium text-muted-foreground">Türkçe Orijinali:</p>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{turkishEquivalent}</p>
               </div>
             )}
           </>
         ) : (
-          <p className="text-muted-foreground italic">No information available.</p>
+          <p className="text-muted-foreground italic">Bilgi bulunmamaktadır.</p>
         )}
       </CardContent>
     </Card>

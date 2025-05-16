@@ -22,13 +22,13 @@ export function ActivityItemCard({ item, isFavorite, onSelectItem, onToggleFavor
           <button
             onClick={() => onSelectItem(item)}
             className="flex-grow text-left pr-2"
-            aria-label={`Select item: ${item.turkishInput}`}
+            aria-label={`Öğeyi seç: ${item.turkishInput}`}
           >
             <p className="text-sm font-medium text-foreground truncate" title={item.turkishInput}>
               {item.turkishInput}
             </p>
             <p className="text-xs text-muted-foreground">
-              {new Date(item.timestamp).toLocaleDateString()} - {item.mode}
+              {new Date(item.timestamp).toLocaleDateString()} - {item.mode === 'Beginner' ? 'Basit' : 'Detaylı'}
             </p>
           </button>
           <Button
@@ -39,7 +39,7 @@ export function ActivityItemCard({ item, isFavorite, onSelectItem, onToggleFavor
               "h-8 w-8 flex-shrink-0",
               isFavorite ? "text-yellow-500 hover:text-yellow-600" : "text-muted-foreground hover:text-foreground"
             )}
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            aria-label={isFavorite ? "Favorilerden kaldır" : "Favorilere ekle"}
           >
             <Star className={cn("h-4 w-4", isFavorite && "fill-current")} />
           </Button>

@@ -2,13 +2,13 @@ import Link from 'next/link';
 import { FlaskConical, PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggleButton } from '@/components/theme-toggle-button';
-import { useSidebar } from '@/components/ui/sidebar'; // Ensure this path is correct
+import { useSidebar } from '@/components/ui/sidebar';
 
 export function AppHeader() {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <header className="sticky top-0 z-30 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <Button
@@ -16,7 +16,7 @@ export function AppHeader() {
             size="icon"
             className="md:hidden"
             onClick={toggleSidebar}
-            aria-label="Toggle History Sidebar"
+            aria-label="Kenar Çubuğunu Aç/Kapat"
           >
             <PanelLeft className="h-5 w-5" />
           </Button>
@@ -32,7 +32,7 @@ export function AppHeader() {
             size="icon"
             className="hidden md:inline-flex"
             onClick={toggleSidebar}
-            aria-label="Toggle History Sidebar"
+            aria-label="Kenar Çubuğunu Aç/Kapat"
           >
             <PanelLeft className="h-5 w-5" />
           </Button>

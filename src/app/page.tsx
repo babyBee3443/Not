@@ -9,7 +9,7 @@ import { ActivityItemCard } from '@/components/activity-item-card';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from '@/components/ui/input'; // Import Input component
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import useLocalStorage from '@/hooks/use-local-storage';
 import type { AIResults, HistoryEntry, ExplanationMode } from '@/lib/types';
@@ -54,7 +54,7 @@ export default function BioLinguaLearnPage() {
         results.englishSentence = sentenceRes.value.englishSentence;
       } else {
         console.error("Error translating sentence:", sentenceRes.reason);
-        toast({ title: "Error", description: "Failed to translate sentence.", variant: "destructive" });
+        toast({ title: "Hata", description: "Cümle çevrilemedi.", variant: "destructive" });
       }
 
       if (termRes.status === 'fulfilled') {
@@ -62,14 +62,14 @@ export default function BioLinguaLearnPage() {
         results.definition = termRes.value.definition;
       } else {
         console.error("Error translating term:", termRes.reason);
-        toast({ title: "Error", description: "Failed to translate term.", variant: "destructive" });
+        toast({ title: "Hata", description: "Terim çevrilemedi.", variant: "destructive" });
       }
       
       if (explanationRes.status === 'fulfilled') {
         results.explanation = explanationRes.value.explanation;
       } else {
         console.error("Error explaining term:", explanationRes.reason);
-        toast({ title: "Error", description: "Failed to explain term.", variant: "destructive" });
+        toast({ title: "Hata", description: "Terim açıklanamadı.", variant: "destructive" });
       }
       
       setCurrentResults(results);
@@ -85,7 +85,7 @@ export default function BioLinguaLearnPage() {
 
     } catch (error) {
       console.error("AI processing error:", error);
-      toast({ title: "Processing Error", description: "An unexpected error occurred.", variant: "destructive" });
+      toast({ title: "İşlem Hatası", description: "Beklenmedik bir hata oluştu.", variant: "destructive" });
       setCurrentResults({});
     } finally {
       setIsLoading(false);
@@ -110,14 +110,14 @@ export default function BioLinguaLearnPage() {
   const handleClearHistory = () => {
     setHistory([]);
     setFavorites(prevFavorites => prevFavorites.filter(favId => !history.find(h => h.id === favId)));
-    setHistorySearchTerm(''); // Clear search on history clear
-    toast({ title: "History Cleared" });
+    setHistorySearchTerm('');
+    toast({ title: "Geçmiş Temizlendi" });
   };
   
   const handleClearFavorites = () => {
     setFavorites([]);
-    setFavoritesSearchTerm(''); // Clear search on favorites clear
-    toast({ title: "Favorites Cleared" });
+    setFavoritesSearchTerm('');
+    toast({ title: "Favoriler Temizlendi" });
   };
 
   const favoriteEntries = history.filter(item => favorites.includes(item.id));
@@ -139,15 +139,15 @@ export default function BioLinguaLearnPage() {
             <TabsList className="grid w-full grid-cols-3 mb-6">
               <TabsTrigger value="translate" className="gap-1">
                 <Languages className="h-4 w-4" />
-                Translate
+                Çevir
               </TabsTrigger>
               <TabsTrigger value="history" className="gap-1">
                 <HistoryIcon className="h-4 w-4" />
-                History {history.length > 0 && <span className="ml-1 text-xs">({history.length})</span>}
+                Geçmiş {history.length > 0 && <span className="ml-1 text-xs">({history.length})</span>}
               </TabsTrigger>
               <TabsTrigger value="favorites" className="gap-1">
                 <Star className="h-4 w-4" />
-                Favorites {favoriteEntries.length > 0 && <span className="ml-1 text-xs">({favoriteEntries.length})</span>}
+                Favoriler {favoriteEntries.length > 0 && <span className="ml-1 text-xs">({favoriteEntries.length})</span>}
               </TabsTrigger>
             </TabsList>
 
@@ -167,7 +167,7 @@ export default function BioLinguaLearnPage() {
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                       type="text"
-                      placeholder="Search history..."
+                      placeholder="Geçmişte ara..."
                       value={historySearchTerm}
                       onChange={(e) => setHistorySearchTerm(e.target.value)}
                       className="pl-8 w-full"
@@ -181,15 +181,15 @@ export default function BioLinguaLearnPage() {
                       className="w-full sm:w-auto flex-shrink-0"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Clear History
+                      Geçmişi Temizle
                     </Button>
                   )}
                 </div>
                 <ScrollArea className="h-[400px] pr-3 border rounded-md">
                   {history.length === 0 ? (
-                    <p className="p-4 text-center text-sm text-muted-foreground">No history yet.</p>
+                    <p className="p-4 text-center text-sm text-muted-foreground">Henüz geçmiş kaydı yok.</p>
                   ) : filteredHistory.length === 0 ? (
-                    <p className="p-4 text-center text-sm text-muted-foreground">No matching history entries found.</p>
+                    <p className="p-4 text-center text-sm text-muted-foreground">Eşleşen geçmiş kaydı bulunamadı.</p>
                   ) : (
                     <div className="p-2 space-y-2">
                       {filteredHistory.map(item => (
@@ -214,7 +214,7 @@ export default function BioLinguaLearnPage() {
                       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         type="text"
-                        placeholder="Search favorites..."
+                        placeholder="Favorilerde ara..."
                         value={favoritesSearchTerm}
                         onChange={(e) => setFavoritesSearchTerm(e.target.value)}
                         className="pl-8 w-full"
@@ -228,15 +228,15 @@ export default function BioLinguaLearnPage() {
                       className="w-full sm:w-auto flex-shrink-0"
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
-                      Clear Favorites
+                      Favorileri Temizle
                     </Button>
                   )}
                 </div>
                 <ScrollArea className="h-[400px] pr-3 border rounded-md">
                   {favoriteEntries.length === 0 ? (
-                    <p className="p-4 text-center text-sm text-muted-foreground">No favorites yet.</p>
+                    <p className="p-4 text-center text-sm text-muted-foreground">Henüz favori yok.</p>
                   ) : filteredFavorites.length === 0 ? (
-                     <p className="p-4 text-center text-sm text-muted-foreground">No matching favorite entries found.</p>
+                     <p className="p-4 text-center text-sm text-muted-foreground">Eşleşen favori kaydı bulunamadı.</p>
                   ) : (
                      <div className="p-2 space-y-2">
                       {filteredFavorites.map(item => (
