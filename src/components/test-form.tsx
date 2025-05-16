@@ -14,7 +14,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Loader2, FileText } from 'lucide-react';
 
 const testFormSchema = z.object({
-  topic: z.string().min(3, { message: 'Konu en az 3 karakter olmalıdır.' }).max(150, { message: 'Konu 150 karakteri aşamaz.' }),
+  topic: z.string().max(150, { message: 'Konu 150 karakteri aşamaz.' }).optional(), // Optional, allowing empty for general test
   gradeLevel: z.enum(['9', '10', '11', '12'], { errorMap: () => ({ message: "Lütfen geçerli bir sınıf seviyesi seçin."}) }),
   difficultyLevel: z.enum(['Kolay', 'Orta', 'Zor'], { errorMap: () => ({ message: "Lütfen geçerli bir zorluk seviyesi seçin."}) }),
   numberOfQuestions: z.coerce.number().min(1, {message: "En az 1 soru olmalıdır."}).max(10, {message: "En fazla 10 soru olabilir."}),
@@ -31,7 +31,7 @@ export function TestForm({ onSubmit, isLoading }: TestFormProps) {
   const form = useForm<TestFormValues>({
     resolver: zodResolver(testFormSchema),
     defaultValues: {
-      topic: '',
+      topic: '', // Default to empty for clarity
       gradeLevel: '9',
       difficultyLevel: 'Orta',
       numberOfQuestions: 5,
@@ -49,14 +49,14 @@ export function TestForm({ onSubmit, isLoading }: TestFormProps) {
               <FormLabel className="text-lg font-semibold">Test Konusu</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="e.g., Hücre Bölünmeleri, Ekosistem Ekolojisi"
+                  placeholder="e.g., Hücre Bölünmeleri (veya boş bırakın)"
                   className="text-base p-3"
                   {...field}
                   disabled={isLoading}
                 />
               </FormControl>
               <FormDescription>
-                Testin hazırlanacağı biyoloji konusunu girin.
+                Tek bir konu, virgülle ayrılmış konular (örn: Hücre, Mitoz) veya genel test için boş bırakın.
               </FormDescription>
               <FormMessage />
             </FormItem>

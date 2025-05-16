@@ -19,7 +19,7 @@ const QuestionItemSchema = z.object({
 });
 
 const GenerateBiologyTestInputSchema = z.object({
-  topic: z.string().describe('The biology topic for which the test is to be generated (e.g., "Hücre Zarı ve Madde Geçişleri", "Mitoz ve Mayoz Bölünme").'),
+  topic: z.string().describe('The biology topic(s) for which the test is to be generated. Can be a single topic (e.g., "Hücre Zarı"), comma-separated topics (e.g., "Fotosentez, Solunum"), or empty for a general test for the grade level.'),
   gradeLevel: z.enum(['9', '10', '11', '12']).describe("The student's grade level (9th, 10th, 11th, or 12th grade) to tailor the content to the Turkish high school biology curriculum."),
   difficultyLevel: z.enum(['Kolay', 'Orta', 'Zor']).default('Orta').describe('The desired difficulty level for the test questions ("Kolay", "Orta", "Zor").'),
   numberOfQuestions: z.number().min(1).max(10).default(5).describe('The number of questions to generate for the test (e.g., 5, 10). Maximum 10.'),
@@ -45,28 +45,32 @@ You are a highly experienced and meticulous Turkish high school biology teacher,
 
 Your task is to generate a biology test in TURKISH based on the student's request.
 
-Here are your guidelines:
-1.  **Curriculum Adherence**: All questions must be accurate and strictly align with the MEB curriculum for the specified 'gradeLevel' and 'topic'.
-2.  **Difficulty Level ('difficultyLevel')**:
-    *   'Kolay': Focus on recall of basic facts, definitions, and direct comprehension.
-    *   'Orta': Require understanding, interpretation, and application of concepts. May involve simple analysis.
-    *   'Zor': Demand analysis, synthesis, evaluation, or solving multi-step problems. Questions may require connecting multiple concepts.
-3.  **Number of Questions ('numberOfQuestions')**: Generate exactly the specified number of questions.
-4.  **Question Structure (for each question in the 'questions' array)**:
-    *   'questionText': Clear, unambiguous question in Turkish.
-    *   'options': Four distinct multiple-choice options in Turkish. One option must be clearly correct, and the others should be plausible distractors.
-    *   'correctAnswerIndex': The 0-based index of the correct option.
-    *   'explanation': A concise explanation in Turkish detailing why the correct answer is right and, if helpful, why common distractors might be wrong.
-5.  **Test Title ('testTitle')**: Create an appropriate and descriptive title for the test in Turkish.
-6.  **Language**: All output MUST be in Turkish.
-
 Student's Request:
 Topic: {{{topic}}}
 Grade Level: {{{gradeLevel}}}
 Difficulty Level: {{{difficultyLevel}}}
 Number of Questions: {{{numberOfQuestions}}}
 
-Please generate the test strictly according to the output schema. Ensure all questions are unique and test different aspects of the topic where possible.
+Here are your guidelines:
+1.  **Topic Handling**:
+    *   If the 'topic' field is empty or not specific (e.g., general terms like "biyoloji"), generate a general biology test covering a broad range of concepts appropriate for the given 'gradeLevel'. The test title should reflect this (e.g., "9. Sınıf Genel Biyoloji Değerlendirme Testi").
+    *   If the 'topic' field contains a single subject (e.g., "Hücre Organelleri"), focus the questions on that specific subject. The test title should be specific to this topic.
+    *   If the 'topic' field contains multiple subjects separated by commas (e.g., "Fotosentez, Solunum, Enzimler"), create a mixed test with questions covering all listed subjects. The test title should reflect that it's a mixed test (e.g., "Fotosentez, Solunum ve Enzimler Karışık Testi").
+2.  **Curriculum Adherence**: All questions must be accurate and strictly align with the MEB curriculum for the specified 'gradeLevel' and 'topic'(s).
+3.  **Difficulty Level ('difficultyLevel')**:
+    *   'Kolay': Focus on recall of basic facts, definitions, and direct comprehension. Questions should be straightforward and test foundational knowledge.
+    *   'Orta': Require understanding, interpretation, and application of concepts. May involve simple analysis, comparing/contrasting basic concepts, or applying knowledge to slightly new scenarios.
+    *   'Zor': Demand analysis, synthesis, evaluation, or solving multi-step problems. Questions may require connecting multiple complex concepts, interpreting data, or applying knowledge to unfamiliar, complex scenarios.
+4.  **Number of Questions ('numberOfQuestions')**: Generate exactly the specified number of questions.
+5.  **Question Structure (for each question in the 'questions' array)**:
+    *   'questionText': Clear, unambiguous question in Turkish.
+    *   'options': Four distinct multiple-choice options in Turkish. One option must be clearly correct, and the others should be plausible distractors, appropriate for the difficulty level. Avoid trick questions.
+    *   'correctAnswerIndex': The 0-based index of the correct option.
+    *   'explanation': A concise explanation in Turkish detailing why the correct answer is right and, if helpful, why common distractors might be wrong. The explanation should reinforce learning.
+6.  **Test Title ('testTitle')**: Create an appropriate and descriptive title for the test in Turkish, reflecting the topic handling guideline (e.g., "9. Sınıf Genel Biyoloji Testi", "Fotosentez ve Solunum Karışık Testi").
+7.  **Language**: All output MUST be in Turkish.
+
+Please generate the test strictly according to the output schema. Ensure all questions are unique and test different aspects of the topic(s) where possible.
 `,
 });
 
