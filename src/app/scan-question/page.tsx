@@ -47,7 +47,7 @@ export default function ScanQuestionPage() {
                 const capabilities = track.getCapabilities();
                 // Safely check for focusMode
                 if ('focusMode' in capabilities && Array.isArray((capabilities as any).focusMode) && (capabilities as any).focusMode.includes('continuous')) {
-                  track.applyConstraints({ advanced: [{ focusMode: 'continuous' } as any] })
+                  track.applyConstraints({ advanced: [{ focusMode: 'continuous' } as any] }) // Cast to any here
                     .then(() => console.log("Sürekli otomatik netleme modu uygulandı."))
                     .catch(e => console.warn("Sürekli otomatik netleme modu uygulanamadı:", e));
                 } else {
@@ -194,12 +194,12 @@ export default function ScanQuestionPage() {
                 <ScanSearch className="h-16 w-16 text-primary mx-auto mb-4" />
                 <h1 className="text-3xl font-bold text-primary">Soru Tara ve Çözdür</h1>
                 <p className="text-muted-foreground mt-2">
-                  Biyoloji sorunuzun fotoğrafını çekin veya galeriden yükleyin, yapay zeka sizin için çözsün ve açıklasın!
+                  Biyoloji sorunuzun fotoğrafını galeriden yükleyin, yapay zeka sizin için çözsün ve açıklasın!
                 </p>
               </div>
-            <Button onClick={() => setMode('camera')} className="w-full text-lg py-6" variant="default">
+            {/* <Button onClick={() => setMode('camera')} className="w-full text-lg py-6" variant="default">
               <Camera className="mr-2 h-6 w-6" /> Kamerayı Kullan
-            </Button>
+            </Button> */}
             <Button onClick={() => fileInputRef.current?.click()} className="w-full text-lg py-6" variant="secondary">
               <ImageUp className="mr-2 h-6 w-6" /> Galeriden Yükle
             </Button>
@@ -213,6 +213,17 @@ export default function ScanQuestionPage() {
           </div>
         );
       case 'camera':
+        if (hasCameraPermission === null) {
+          return (
+            <Alert variant="default" className="mt-4">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <AlertTitle>Kamera İzni Bekleniyor</AlertTitle>
+                <AlertDescription>
+                    Kameranıza erişmek için tarayıcınız sizden izin isteyebilir. Lütfen izin verin.
+                </AlertDescription>
+            </Alert>
+          )
+        }
         if (hasCameraPermission === false) {
            return (
             <div className="space-y-4">
@@ -235,15 +246,6 @@ export default function ScanQuestionPage() {
                  <video ref={videoRef} className="w-full h-full object-cover" autoPlay muted playsInline />
             </div>
             <canvas ref={canvasRef} className="hidden" />
-            {hasCameraPermission === null && ( 
-                 <Alert variant="default" className="mt-4">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <AlertTitle>Kamera İzni Bekleniyor</AlertTitle>
-                    <AlertDescription>
-                        Kameranıza erişmek için tarayıcınız sizden izin isteyebilir. Lütfen izin verin.
-                    </AlertDescription>
-                </Alert>
-            )}
             {hasCameraPermission && (
                 <Button onClick={handleCaptureImage} className="w-full max-w-md text-lg py-3">
                     <CheckCircle className="mr-2 h-5 w-5" /> Fotoğraf Çek
@@ -404,3 +406,5 @@ export default function ScanQuestionPage() {
     </div>
   );
 }
+
+    
