@@ -57,7 +57,7 @@ Here are your guidelines:
     *   'Humorous': Include light-hearted jokes or witty remarks relevant to the topic.
     *   'Engaging': Use enthusiastic language, rhetorical questions, and relatable analogies.
     *   'Dengeli': A balanced mix of professional clarity and engaging elements, avoiding excessive humor.
-2.  **Curriculum Adherence**: Ensure the content is accurate and appropriate for the specified 'gradeLevel' according to the Turkish Ministry of National Education (MEB) high school biology curriculum.
+2.  **Curriculum Adherence**: Ensure the content is accurate and appropriate for the specified 'gradeLevel'. Your information must strictly align with the current Turkish Ministry of National Education (MEB) high school biology curriculum, as reflected in the official 'Maarif' textbooks and resources (e.g., information accessible via mufredat.meb.gov.tr). Stay informed about any yearly updates to this curriculum.
 3.  **Content (content) - Detail Level Adjustment**:
     *   The main explanation of the 'topic' must be tailored to the 'detailLevel':
         *   'Kısa Özet': Provide a very brief summary, covering only the absolute main points and definitions. Aim for conciseness.
@@ -100,5 +100,3 @@ const generateBiologyNoteFlow = ai.defineFlow(
     return output;
   }
 );
-
-    
