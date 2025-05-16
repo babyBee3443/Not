@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from 'react';
@@ -69,7 +70,7 @@ export function InputForm({ onSubmit, isLoading, defaultValues }: InputFormProps
             <FormItem className="space-y-3">
               <FormLabel className="text-lg font-semibold">Açıklama Detayı</FormLabel>
               <div className="flex items-center space-x-4">
-                <Label htmlFor="explanation-mode-switch" className="font-normal text-muted-foreground">
+                <Label htmlFor="explanation-mode-switch" className="font-normal">
                   Basit
                 </Label>
                 <FormControl>
@@ -78,9 +79,10 @@ export function InputForm({ onSubmit, isLoading, defaultValues }: InputFormProps
                     checked={field.value === 'Advanced'}
                     onCheckedChange={(checked) => field.onChange(checked ? 'Advanced' : 'Beginner')}
                     aria-label="Açıklama detay modu"
+                    className="data-[state=unchecked]:bg-muted/50"
                   />
                 </FormControl>
-                <Label htmlFor="explanation-mode-switch" className="font-normal text-muted-foreground">
+                <Label htmlFor="explanation-mode-switch" className="font-normal">
                   Detaylı
                 </Label>
               </div>
