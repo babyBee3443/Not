@@ -202,99 +202,81 @@ export default function BioLinguaLearnPage() {
                  .replace(/'/g, "&#039;");
         }
 
-        printWindow.document.write(\`
-            <html>
-            <head>
-                <title>BioLinguaLearn Sonuçları</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; color: #333; }
-                    h1 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 20px; font-size: 24px; }
-                    .section { margin-bottom: 25px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-                    .section-title { font-weight: bold; color: #007bff; margin-bottom: 8px; font-size: 18px; }
-                    .translation-title { font-weight: bold; color: #28a745; margin-bottom: 5px; font-size: 16px; margin-top:10px; }
-                    .content-text { white-space: pre-wrap; font-size: 16px; color: #444; }
-                    @media print {
-                        body { margin: 10mm; }
-                        .section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
-                        h1 { font-size: 20px; }
-                        .section-title { font-size: 16px; }
-                        .translation-title { font-size: 14px; }
-                        .content-text { font-size: 14px; }
-                    }
-                </style>
-            </head>
-            <body>
-                <h1>BioLinguaLearn Çeviri Sonuçları</h1>
+        const htmlParts = [];
+        htmlParts.push('<html><head><title>BioLinguaLearn Sonuçları</title>');
+        htmlParts.push('<style>');
+        htmlParts.push('body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; color: #333; }');
+        htmlParts.push('h1 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 20px; font-size: 24px; }');
+        htmlParts.push('.section { margin-bottom: 25px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }');
+        htmlParts.push('.section-title { font-weight: bold; color: #007bff; margin-bottom: 8px; font-size: 18px; }');
+        htmlParts.push('.translation-title { font-weight: bold; color: #28a745; margin-bottom: 5px; font-size: 16px; margin-top:10px; }');
+        htmlParts.push('.content-text { white-space: pre-wrap; font-size: 16px; color: #444; }');
+        htmlParts.push('@media print {');
+        htmlParts.push('body { margin: 10mm; }');
+        htmlParts.push('.section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }');
+        htmlParts.push('h1 { font-size: 20px; }');
+        htmlParts.push('.section-title { font-size: 16px; }');
+        htmlParts.push('.translation-title { font-size: 14px; }');
+        htmlParts.push('.content-text { font-size: 14px; }');
+        htmlParts.push('}');
+        htmlParts.push('</style></head><body>');
+        htmlParts.push('<h1>BioLinguaLearn Çeviri Sonuçları</h1>');
 
-                \${currentInput.turkishInput ? \`
-                <div class="section">
-                    <div class="section-title">Orijinal Girdi (Türkçe):</div>
-                    <div class="content-text">\${escapeHtml(currentInput.turkishInput)}</div>
-                </div>
-                \` : ''}
+        if (currentInput.turkishInput) {
+            htmlParts.push('<div class="section">');
+            htmlParts.push('<div class="section-title">Orijinal Girdi (Türkçe):</div>');
+            htmlParts.push('<div class="content-text">' + escapeHtml(currentInput.turkishInput) + '</div>');
+            htmlParts.push('</div>');
+        }
 
-                \${currentResults.englishTerm ? \`
-                <div class="section">
-                    <div class="section-title">İngilizce Terim:</div>
-                    <div class="content-text">\${escapeHtml(currentResults.englishTerm)}</div>
-                    \${fetchedTurkishTranslations.term ? \`
-                        <div>
-                            <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
-                            <div class="content-text">\${escapeHtml(fetchedTurkishTranslations.term)}</div>
-                        </div>
-                    \` : ''}
-                </div>
-                \` : ''}
+        if (currentResults.englishTerm) {
+            htmlParts.push('<div class="section">');
+            htmlParts.push('<div class="section-title">İngilizce Terim:</div>');
+            htmlParts.push('<div class="content-text">' + escapeHtml(currentResults.englishTerm) + '</div>');
+            if (fetchedTurkishTranslations.term) {
+                htmlParts.push('<div><div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>');
+                htmlParts.push('<div class="content-text">' + escapeHtml(fetchedTurkishTranslations.term) + '</div></div>');
+            }
+            htmlParts.push('</div>');
+        }
 
-                \${currentResults.englishSentence ? \`
-                <div class="section">
-                    <div class="section-title">Tam İngilizce Çeviri:</div>
-                    <div class="content-text">\${escapeHtml(currentResults.englishSentence)}</div>
-                     \${fetchedTurkishTranslations.sentence ? \`
-                        <div>
-                            <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
-                            <div class="content-text">\${escapeHtml(fetchedTurkishTranslations.sentence)}</div>
-                        </div>
-                    \` : ''}
-                </div>
-                \` : ''}
+        if (currentResults.englishSentence) {
+            htmlParts.push('<div class="section">');
+            htmlParts.push('<div class="section-title">Tam İngilizce Çeviri:</div>');
+            htmlParts.push('<div class="content-text">' + escapeHtml(currentResults.englishSentence) + '</div>');
+            if (fetchedTurkishTranslations.sentence) {
+                htmlParts.push('<div><div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>');
+                htmlParts.push('<div class="content-text">' + escapeHtml(fetchedTurkishTranslations.sentence) + '</div></div>');
+            }
+            htmlParts.push('</div>');
+        }
 
-                \${currentResults.definition ? \`
-                <div class="section">
-                    <div class="section-title">Tanım:</div>
-                    <div class="content-text">\${escapeHtml(currentResults.definition)}</div>
-                     \${fetchedTurkishTranslations.definition ? \`
-                        <div>
-                            <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
-                            <div class="content-text">\${escapeHtml(fetchedTurkishTranslations.definition)}</div>
-                        </div>
-                    \` : ''}
-                </div>
-                \` : ''}
+        if (currentResults.definition) {
+            htmlParts.push('<div class="section">');
+            htmlParts.push('<div class="section-title">Tanım:</div>');
+            htmlParts.push('<div class="content-text">' + escapeHtml(currentResults.definition) + '</div>');
+            if (fetchedTurkishTranslations.definition) {
+                htmlParts.push('<div><div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>');
+                htmlParts.push('<div class="content-text">' + escapeHtml(fetchedTurkishTranslations.definition) + '</div></div>');
+            }
+            htmlParts.push('</div>');
+        }
 
-                \${currentResults.explanation ? \`
-                <div class="section">
-                    <div class="section-title">Açıklama:</div>
-                    <div class="content-text">\${escapeHtml(currentResults.explanation)}</div>
-                     \${fetchedTurkishTranslations.explanation ? \`
-                        <div>
-                            <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
-                            <div class="content-text">\${escapeHtml(fetchedTurkishTranslations.explanation)}</div>
-                        </div>
-                    \` : ''}
-                </div>
-                \` : ''}
+        if (currentResults.explanation) {
+            htmlParts.push('<div class="section">');
+            htmlParts.push('<div class="section-title">Açıklama:</div>');
+            htmlParts.push('<div class="content-text">' + escapeHtml(currentResults.explanation) + '</div>');
+            if (fetchedTurkishTranslations.explanation) {
+                htmlParts.push('<div><div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>');
+                htmlParts.push('<div class="content-text">' + escapeHtml(fetchedTurkishTranslations.explanation) + '</div></div>');
+            }
+            htmlParts.push('</div>');
+        }
 
-                <script>
-                    window.onload = function() {
-                        window.print();
-                        // Consider adding window.close(); here, but test thoroughly
-                        // as it can be blocked by browsers or close too soon.
-                    }
-                </script>
-            </body>
-            </html>
-        \`);
+        htmlParts.push('<script>window.onload = function() { window.print(); /* window.close(); */ }</script>');
+        htmlParts.push('</body></html>');
+        
+        printWindow.document.write(htmlParts.join(''));
         printWindow.document.close();
     } else {
         toast({
