@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Generates biology tests in Turkish, acting as a knowledgeable high school biology teacher.
@@ -52,10 +53,10 @@ Here are your guidelines:
     *   'Zor': Demand analysis, synthesis, evaluation, or solving multi-step problems. Questions may require connecting multiple concepts.
 3.  **Number of Questions ('numberOfQuestions')**: Generate exactly the specified number of questions.
 4.  **Question Structure (for each question in the 'questions' array)**:
-    *   `questionText`: Clear, unambiguous question in Turkish.
-    *   `options`: Four distinct multiple-choice options in Turkish. One option must be clearly correct, and the others should be plausible distractors.
-    *   `correctAnswerIndex`: The 0-based index of the correct option.
-    *   `explanation`: A concise explanation in Turkish detailing why the correct answer is right and, if helpful, why common distractors might be wrong.
+    *   'questionText': Clear, unambiguous question in Turkish.
+    *   'options': Four distinct multiple-choice options in Turkish. One option must be clearly correct, and the others should be plausible distractors.
+    *   'correctAnswerIndex': The 0-based index of the correct option.
+    *   'explanation': A concise explanation in Turkish detailing why the correct answer is right and, if helpful, why common distractors might be wrong.
 5.  **Test Title ('testTitle')**: Create an appropriate and descriptive title for the test in Turkish.
 6.  **Language**: All output MUST be in Turkish.
 
