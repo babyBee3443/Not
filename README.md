@@ -64,3 +64,4 @@ Next.js uygulamalarını dağıtmak için [Vercel](https://vercel.com) veya [Net
 ## Katkıda Bulunma
 
 Katkılarınız için teşekkürler! Lütfen bir "issue" açın veya "pull request" gönderin.
+# Transltae
