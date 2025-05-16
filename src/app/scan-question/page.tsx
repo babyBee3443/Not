@@ -70,7 +70,7 @@ export default function ScanQuestionPage() {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg');
         setImageSrc(dataUrl);
-        setAiResults(null); // Clear previous AI results
+        setAiResults(null); 
         setError(null);
         setMode('preview');
         if (videoRef.current && videoRef.current.srcObject) {
@@ -90,7 +90,7 @@ export default function ScanQuestionPage() {
       const reader = new FileReader();
       reader.onload = (e) => {
         setImageSrc(e.target?.result as string);
-        setAiResults(null); // Clear previous AI results
+        setAiResults(null); 
         setError(null);
         setMode('preview');
       };
@@ -118,20 +118,20 @@ export default function ScanQuestionPage() {
       const result = await solveImageQuestion({ imageDataUri: imageSrc });
       setAiResults(result);
       if (result.isBiologyQuestion) {
+        setError(null); // Clear previous errors if successful
         toast({ title: "Soru Çözüldü!", description: "Yapay zeka sorunuzu analiz etti ve çözüm üretti." });
         setMode('results');
       } else {
         setError(result.explanation || "Görüntü bir biyoloji sorusu olarak tanımlanamadı.");
         toast({ title: "Soru Tanımlanamadı", description: result.explanation || "Lütfen net bir biyoloji sorusu içeren bir görüntü yükleyin.", variant: "default" });
-        // Stay in preview mode or go back to select if user wants
-        setMode('preview'); // Allow user to see the image and error
+        setMode('preview'); 
       }
     } catch (err) {
       console.error("AI Soru Çözme Hatası:", err);
       const errorMessage = err instanceof Error ? err.message : "Soru işlenirken bilinmeyen bir hata oluştu.";
       setError(errorMessage);
       toast({ variant: "destructive", title: "Yapay Zeka Hatası", description: errorMessage });
-      setMode('preview'); // Allow user to see the image and error
+      setMode('preview'); 
     } finally {
       setIsProcessingAi(false);
     }
@@ -181,7 +181,6 @@ export default function ScanQuestionPage() {
             </div>
           );
         }
-        // Ensure video tag is always rendered to avoid race condition with permission check
         return (
           <div className="space-y-4 flex flex-col items-center">
             <div className="w-full max-w-md aspect-[3/4] bg-muted rounded-lg overflow-hidden shadow-lg">
@@ -226,9 +225,18 @@ export default function ScanQuestionPage() {
               <RefreshCcw className="mr-2 h-5 w-5" /> Yeniden Çek / Başka Yükle
             </Button>
             {error && (
-                <Alert variant="destructive" className="w-full max-w-md">
-                    <XCircle className="h-4 w-4" />
-                    <AlertTitle>Hata</AlertTitle>
+                <Alert 
+                  variant={aiResults && !aiResults.isBiologyQuestion ? "default" : "destructive"} 
+                  className="w-full max-w-md"
+                >
+                    {aiResults && !aiResults.isBiologyQuestion 
+                        ? <HelpCircleIcon className="h-4 w-4" /> 
+                        : <XCircle className="h-4 w-4" />}
+                    <AlertTitle>
+                        {aiResults && !aiResults.isBiologyQuestion 
+                            ? "Soru Tanımlanamadı" 
+                            : "İşlem Hatası"}
+                    </AlertTitle>
                     <AlertDescription>{error}</AlertDescription>
                 </Alert>
             )}
@@ -236,7 +244,6 @@ export default function ScanQuestionPage() {
         );
         case 'results':
             if (!aiResults) {
-                // Should not happen if mode is 'results', but as a fallback
                 return <Button onClick={handleRetakeOrUploadAnother}>Yeni Soru Tara</Button>;
             }
             return (
@@ -278,13 +285,6 @@ export default function ScanQuestionPage() {
                             <p className="text-foreground/90 whitespace-pre-wrap">{aiResults.explanation}</p>
                         </CardContent>
                     </Card>
-                     {error && !aiResults.isBiologyQuestion && ( // Show specific error if not a biology question based on AI
-                        <Alert variant="destructive" className="w-full">
-                            <XCircle className="h-4 w-4" />
-                            <AlertTitle>Soru Tanımlanamadı</AlertTitle>
-                            <AlertDescription>{aiResults.explanation || "Görüntü bir biyoloji sorusu olarak tanımlanamadı veya net değil."}</AlertDescription>
-                        </Alert>
-                    )}
                     <Button onClick={handleRetakeOrUploadAnother} variant="default" className="w-full text-lg py-3">
                         <RefreshCcw className="mr-2 h-5 w-5" /> Yeni Soru Tara
                     </Button>
@@ -308,3 +308,5 @@ export default function ScanQuestionPage() {
   );
 }
 
+
+    
