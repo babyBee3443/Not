@@ -41,6 +41,23 @@ export default function BioLinguaLearnPage() {
     setCurrentInput(values);
     setLastMode(values.mode);
 
+    const normalizedSubmittedInput = values.turkishInput.trim().toLowerCase();
+    const existingHistoryEntry = history.find(
+      (entry) =>
+        entry.turkishInput.trim().toLowerCase() === normalizedSubmittedInput &&
+        entry.mode === values.mode
+    );
+
+    if (existingHistoryEntry) {
+      setCurrentResults(existingHistoryEntry.results);
+      toast({
+        title: "Geçmişten Yüklendi",
+        description: `"${values.turkishInput}" için sonuçlar geçmişten getirildi.`,
+      });
+      setIsLoading(false);
+      return; 
+    }
+
     try {
       const results: AIResults = {};
       
@@ -77,7 +94,7 @@ export default function BioLinguaLearnPage() {
       const newHistoryEntry: HistoryEntry = {
         id: generateId(),
         timestamp: Date.now(),
-        turkishInput: values.turkishInput,
+        turkishInput: values.turkishInput.trim(), // Store trimmed version but original case
         mode: values.mode,
         results,
       };
@@ -259,3 +276,5 @@ export default function BioLinguaLearnPage() {
     </div>
   );
 }
+
+    
