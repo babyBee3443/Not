@@ -16,7 +16,7 @@ import type { AIResults, HistoryEntry, ExplanationMode } from '@/lib/types';
 import { translateSentence } from '@/ai/flows/translate-sentence';
 import { translateTerm } from '@/ai/flows/translate-term';
 import { explainTerm } from '@/ai/flows/explain-term';
-import { History as HistoryIcon, Star, Trash2, Languages, Search } from 'lucide-react';
+import { History as HistoryIcon, Star, Trash2, Languages, Search, Printer } from 'lucide-react';
 
 const generateId = () => Math.random().toString(36).substr(2, 9);
 
@@ -94,7 +94,7 @@ export default function BioLinguaLearnPage() {
       const newHistoryEntry: HistoryEntry = {
         id: generateId(),
         timestamp: Date.now(),
-        turkishInput: values.turkishInput.trim(), // Store trimmed version but original case
+        turkishInput: values.turkishInput.trim(),
         mode: values.mode,
         results,
       };
@@ -137,6 +137,106 @@ export default function BioLinguaLearnPage() {
     toast({ title: "Favoriler Temizlendi" });
   };
 
+  const handlePrintToPdf = () => {
+    if (!currentResults || !currentInput) {
+        toast({
+            title: "PDF Oluşturulamadı",
+            description: "Önce bir çeviri yapmanız gerekiyor.",
+            variant: "destructive",
+        });
+        return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+        const escapeHtml = (unsafe: string | undefined) => {
+            if (!unsafe) return '';
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>BioLinguaLearn Sonuçları</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; color: #333; }
+                    h1 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px; margin-bottom: 20px; font-size: 24px; }
+                    .section { margin-bottom: 25px; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+                    .section-title { font-weight: bold; color: #007bff; margin-bottom: 8px; font-size: 18px; }
+                    .content-text { white-space: pre-wrap; font-size: 16px; color: #444; }
+                    @media print {
+                        body { margin: 10mm; }
+                        .section { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+                        h1 { font-size: 20px; }
+                        .section-title { font-size: 16px; }
+                        .content-text { font-size: 14px; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h1>BioLinguaLearn Çeviri Sonuçları</h1>
+
+                ${currentInput.turkishInput ? `
+                <div class="section">
+                    <div class="section-title">Orijinal Girdi (Türkçe):</div>
+                    <div class="content-text">${escapeHtml(currentInput.turkishInput)}</div>
+                </div>
+                ` : ''}
+
+                ${currentResults.englishTerm ? `
+                <div class="section">
+                    <div class="section-title">İngilizce Terim:</div>
+                    <div class="content-text">${escapeHtml(currentResults.englishTerm)}</div>
+                </div>
+                ` : ''}
+
+                ${currentResults.englishSentence ? `
+                <div class="section">
+                    <div class="section-title">Tam İngilizce Çeviri:</div>
+                    <div class="content-text">${escapeHtml(currentResults.englishSentence)}</div>
+                </div>
+                ` : ''}
+
+                ${currentResults.definition ? `
+                <div class="section">
+                    <div class="section-title">Tanım:</div>
+                    <div class="content-text">${escapeHtml(currentResults.definition)}</div>
+                </div>
+                ` : ''}
+
+                ${currentResults.explanation ? `
+                <div class="section">
+                    <div class="section-title">Açıklama:</div>
+                    <div class="content-text">${escapeHtml(currentResults.explanation)}</div>
+                </div>
+                ` : ''}
+
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        // Kullanıcının yazdırma iletişim kutusunu veya yeni sekmeyi manuel olarak kapatmasına izin verin.
+                        // Otomatik kapatma sorunlu olabilir.
+                    }
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    } else {
+        toast({
+            title: "Hata",
+            description: "Yazdırma penceresi açılamadı. Lütfen pop-up engelleyicinizi kontrol edin.",
+            variant: "destructive",
+        });
+    }
+  };
+
+
   const favoriteEntries = history.filter(item => favorites.includes(item.id));
 
   const filteredHistory = history.filter(item => 
@@ -174,6 +274,18 @@ export default function BioLinguaLearnPage() {
                 isLoading={isLoading} 
                 defaultValues={{ turkishInput: currentInput?.turkishInput || '', mode: currentInput?.mode || lastMode }}
               />
+              {currentResults && (
+                <div className="mt-6 text-right">
+                   <Button 
+                     variant="outline" 
+                     onClick={handlePrintToPdf}
+                     disabled={!currentResults || isLoading}
+                   >
+                     <Printer className="mr-2 h-4 w-4" />
+                     Sonuçları Yazdır
+                   </Button>
+                </div>
+              )}
               <ResultsDisplay results={currentResults} isLoading={isLoading} turkishInput={currentInput?.turkishInput} />
             </TabsContent>
 
@@ -276,5 +388,6 @@ export default function BioLinguaLearnPage() {
     </div>
   );
 }
+    
 
     
