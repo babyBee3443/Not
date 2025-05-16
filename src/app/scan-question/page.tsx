@@ -1,3 +1,4 @@
+
 // src/app/scan-question/page.tsx
 "use client";
 
@@ -44,7 +45,8 @@ export default function ScanQuestionPage() {
               const track = videoTracks[0];
               if (typeof track.getCapabilities === 'function') {
                 const capabilities = track.getCapabilities();
-                if (capabilities.focusMode && capabilities.focusMode.includes('continuous')) {
+                // Safely check for focusMode
+                if ('focusMode' in capabilities && Array.isArray((capabilities as any).focusMode) && (capabilities as any).focusMode.includes('continuous')) {
                   track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] })
                     .then(() => console.log("Sürekli otomatik netleme modu uygulandı."))
                     .catch(e => console.warn("Sürekli otomatik netleme modu uygulanamadı:", e));
@@ -236,7 +238,7 @@ export default function ScanQuestionPage() {
             {hasCameraPermission === null && ( 
                  <Alert variant="default" className="mt-4">
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <AlertTitle>Kamera İzni İsteniyor</AlertTitle>
+                    <AlertTitle>Kamera İzni Bekleniyor</AlertTitle>
                     <AlertDescription>
                         Kameranıza erişmek için tarayıcınız sizden izin isteyebilir. Lütfen izin verin.
                     </AlertDescription>
@@ -402,3 +404,5 @@ export default function ScanQuestionPage() {
     </div>
   );
 }
+
+    
