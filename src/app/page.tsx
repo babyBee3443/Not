@@ -202,7 +202,7 @@ export default function BioLinguaLearnPage() {
                  .replace(/'/g, "&#039;");
         }
 
-        printWindow.document.write(`
+        printWindow.document.write(\`
             <html>
             <head>
                 <title>BioLinguaLearn Sonuçları</title>
@@ -226,73 +226,75 @@ export default function BioLinguaLearnPage() {
             <body>
                 <h1>BioLinguaLearn Çeviri Sonuçları</h1>
 
-                ${currentInput.turkishInput ? `
+                \${currentInput.turkishInput ? \`
                 <div class="section">
                     <div class="section-title">Orijinal Girdi (Türkçe):</div>
-                    <div class="content-text">${escapeHtml(currentInput.turkishInput)}</div>
+                    <div class="content-text">\${escapeHtml(currentInput.turkishInput)}</div>
                 </div>
-                ` : ''}
+                \` : ''}
 
-                ${currentResults.englishTerm ? `
+                \${currentResults.englishTerm ? \`
                 <div class="section">
                     <div class="section-title">İngilizce Terim:</div>
-                    <div class="content-text">${escapeHtml(currentResults.englishTerm)}</div>
-                    ${fetchedTurkishTranslations.term ? `
+                    <div class="content-text">\${escapeHtml(currentResults.englishTerm)}</div>
+                    \${fetchedTurkishTranslations.term ? \`
                         <div>
                             <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
-                            <div class="content-text">${escapeHtml(fetchedTurkishTranslations.term)}</div>
+                            <div class="content-text">\${escapeHtml(fetchedTurkishTranslations.term)}</div>
                         </div>
-                    ` : ''}
+                    \` : ''}
                 </div>
-                ` : ''}
+                \` : ''}
 
-                ${currentResults.englishSentence ? `
+                \${currentResults.englishSentence ? \`
                 <div class="section">
                     <div class="section-title">Tam İngilizce Çeviri:</div>
-                    <div class="content-text">${escapeHtml(currentResults.englishSentence)}</div>
-                     ${fetchedTurkishTranslations.sentence ? `
+                    <div class="content-text">\${escapeHtml(currentResults.englishSentence)}</div>
+                     \${fetchedTurkishTranslations.sentence ? \`
                         <div>
                             <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
-                            <div class="content-text">${escapeHtml(fetchedTurkishTranslations.sentence)}</div>
+                            <div class="content-text">\${escapeHtml(fetchedTurkishTranslations.sentence)}</div>
                         </div>
-                    ` : ''}
+                    \` : ''}
                 </div>
-                ` : ''}
+                \` : ''}
 
-                ${currentResults.definition ? `
+                \${currentResults.definition ? \`
                 <div class="section">
                     <div class="section-title">Tanım:</div>
-                    <div class="content-text">${escapeHtml(currentResults.definition)}</div>
-                     ${fetchedTurkishTranslations.definition ? `
+                    <div class="content-text">\${escapeHtml(currentResults.definition)}</div>
+                     \${fetchedTurkishTranslations.definition ? \`
                         <div>
                             <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
-                            <div class="content-text">${escapeHtml(fetchedTurkishTranslations.definition)}</div>
+                            <div class="content-text">\${escapeHtml(fetchedTurkishTranslations.definition)}</div>
                         </div>
-                    ` : ''}
+                    \` : ''}
                 </div>
-                ` : ''}
+                \` : ''}
 
-                ${currentResults.explanation ? `
+                \${currentResults.explanation ? \`
                 <div class="section">
                     <div class="section-title">Açıklama:</div>
-                    <div class="content-text">${escapeHtml(currentResults.explanation)}</div>
-                     ${fetchedTurkishTranslations.explanation ? `
+                    <div class="content-text">\${escapeHtml(currentResults.explanation)}</div>
+                     \${fetchedTurkishTranslations.explanation ? \`
                         <div>
                             <div class="translation-title">İlgili Metnin Türkçe Çevirisi:</div>
-                            <div class="content-text">${escapeHtml(fetchedTurkishTranslations.explanation)}</div>
+                            <div class="content-text">\${escapeHtml(fetchedTurkishTranslations.explanation)}</div>
                         </div>
-                    ` : ''}
+                    \` : ''}
                 </div>
-                ` : ''}
+                \` : ''}
 
                 <script>
                     window.onload = function() {
                         window.print();
+                        // Consider adding window.close(); here, but test thoroughly
+                        // as it can be blocked by browsers or close too soon.
                     }
                 </script>
             </body>
             </html>
-        `);
+        \`);
         printWindow.document.close();
     } else {
         toast({
@@ -342,12 +344,13 @@ export default function BioLinguaLearnPage() {
                 isLoading={isLoading} 
                 defaultValues={{ turkishInput: currentInput?.turkishInput || '', mode: currentInput?.mode || lastMode }}
               />
-              {currentResults && (
-                <div className="mt-6 text-right">
+              {currentResults && Object.keys(currentResults).length > 0 && (
+                <div className="mt-6 flex justify-end">
                    <Button 
                      variant="outline" 
                      onClick={handlePrintToPdf}
-                     disabled={!currentResults || isLoading || isPrintingPdf}
+                     disabled={isLoading || isPrintingPdf}
+                     className="w-full sm:w-auto"
                    >
                      {isPrintingPdf ? (
                         <>
