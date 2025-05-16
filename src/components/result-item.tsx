@@ -3,22 +3,25 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Check, Volume2, VolumeX, Eye, EyeOff } from 'lucide-react';
+import { Copy, Check, Volume2, VolumeX, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { translateEnglishToTurkish } from '@/ai/flows/translate-english-to-turkish';
 
 interface ResultItemProps {
   title: string;
   content?: string;
   isLoading?: boolean;
   isTerm?: boolean;
-  turkishEquivalent?: string;
+  turkishEquivalent?: string; // This is the original user's Turkish input
 }
 
 export function ResultItem({ title, content, isLoading = false, isTerm = false, turkishEquivalent }: ResultItemProps) {
   const [copied, setCopied] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [showTurkish, setShowTurkish] = useState(false);
+  const [showTurkishTranslation, setShowTurkishTranslation] = useState(false);
+  const [translatedTurkishText, setTranslatedTurkishText] = useState<string | null>(null);
+  const [isTranslatingToTurkish, setIsTranslatingToTurkish] = useState(false);
   const { toast } = useToast();
 
   const handleCopy = () => {
@@ -38,23 +41,17 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
 
     if (speechSynthesis.speaking) {
       speechSynthesis.cancel();
-      if (isSpeaking) { // If it was speaking this item, and we click again, just stop.
+      if (isSpeaking) {
         setIsSpeaking(false);
         return;
       }
-      // If it was speaking another item, cancel() already handled it,
-      // and we'll proceed to speak the new item.
     }
     
     const utterance = new SpeechSynthesisUtterance(content);
     utterance.lang = 'en-US';
     
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-    };
-    utterance.onend = () => {
-      setIsSpeaking(false);
-    };
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
     utterance.onerror = (event: SpeechSynthesisErrorEvent) => {
       if (event.error === 'interrupted') {
         console.warn("Speech synthesis interrupted. Code:", event.error, "Content length:", content?.length);
@@ -69,29 +66,46 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
   };
 
   useEffect(() => {
-    // Cleanup function to cancel speech if component unmounts while speaking
     return () => {
       if (isSpeaking && typeof window !== 'undefined' && window.speechSynthesis) {
-        // window.speechSynthesis.cancel(); // Potentially problematic if rapidly changing content
+        // speechSynthesis.cancel(); // Potentially problematic
       }
     };
   }, [isSpeaking]); 
   
   useEffect(() => {
-    // When content changes, stop any ongoing speech for this item.
-    // This prevents audio from a previous state playing over new content.
     if (isSpeaking) {
-        if (typeof window !== 'undefined' && window.speechSynthesis) {
-            window.speechSynthesis.cancel(); // This cancels all speech, ensure it's desired.
-        }
-      setIsSpeaking(false); // Reset speaking state as speech is now stopped.
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      setIsSpeaking(false);
     }
+    // Reset translation when content changes
+    setShowTurkishTranslation(false);
+    setTranslatedTurkishText(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [content]); // Only re-run if content changes
+  }, [content]);
 
-  const toggleShowTurkish = () => {
-    setShowTurkish(prev => !prev);
+  const toggleShowTurkishTranslation = async () => {
+    if (!showTurkishTranslation && !translatedTurkishText && content) {
+      setIsTranslatingToTurkish(true);
+      try {
+        const result = await translateEnglishToTurkish({ englishText: content });
+        setTranslatedTurkishText(result.turkishText);
+      } catch (error) {
+        console.error("Error translating English to Turkish:", error);
+        toast({ title: "Çeviri Hatası", description: "İngilizce metin Türkçeye çevrilemedi.", variant: "destructive" });
+        setTranslatedTurkishText("Çeviri alınamadı.");
+      } finally {
+        setIsTranslatingToTurkish(false);
+      }
+    }
+    setShowTurkishTranslation(prev => !prev);
   };
+
+  // Determine if the content is primarily English or different from the original Turkish input
+  // This is a heuristic. A more robust check might involve language detection.
+  const isContentLikelyEnglishAndNotOriginalInput = content && (title !== "Orijinal Girdi (Türkçe)");
 
   return (
     <Card className={`shadow-lg ${isTerm ? 'border-primary/50 border-2' : ''}`}>
@@ -118,19 +132,37 @@ export function ResultItem({ title, content, isLoading = false, isTerm = false, 
         ) : content ? (
           <>
             <p className={`text-base leading-relaxed whitespace-pre-wrap ${isTerm ? 'text-lg font-semibold' : ''}`}>{content}</p>
-            {turkishEquivalent && (
+            {isContentLikelyEnglishAndNotOriginalInput && (
               <div className="mt-4 pt-3 border-t border-border/70">
-                <Button variant="outline" size="sm" onClick={toggleShowTurkish} className="mb-2 text-xs">
-                  {showTurkish ? <EyeOff className="mr-2 h-3 w-3" /> : <Eye className="mr-2 h-3 w-3" />}
-                  {showTurkish ? "Türkçe Orijinalini Gizle" : "Türkçe Orijinalini Göster"}
+                <Button variant="outline" size="sm" onClick={toggleShowTurkishTranslation} className="mb-2 text-xs">
+                  {showTurkishTranslation ? <EyeOff className="mr-2 h-3 w-3" /> : <Eye className="mr-2 h-3 w-3" />}
+                  {showTurkishTranslation ? "Türkçe Çeviriyi Gizle" : "Bu Metnin Türkçesini Göster"}
                 </Button>
-                {showTurkish && (
+                {showTurkishTranslation && (
                   <div className="p-3 bg-muted/30 rounded-md">
-                    <p className="text-sm font-medium text-muted-foreground">Türkçe Orijinali:</p>
-                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{turkishEquivalent}</p>
+                    {isTranslatingToTurkish ? (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Türkçeye çevriliyor...
+                      </div>
+                    ) : translatedTurkishText ? (
+                      <>
+                        <p className="text-sm font-medium text-muted-foreground">Bu Metnin Türkçe Çevirisi:</p>
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{translatedTurkishText}</p>
+                      </>
+                    ) : (
+                       <p className="text-sm text-muted-foreground italic">Çeviri yüklenemedi.</p>
+                    )}
                   </div>
                 )}
               </div>
+            )}
+            {/* Optionally, show the original user input if it's different from the main content and relevant */}
+            {turkishEquivalent && content !== turkishEquivalent && title !== "Orijinal Girdi (Türkçe)" && !isContentLikelyEnglishAndNotOriginalInput && (
+                 <div className="mt-2 pt-2 border-t border-dashed border-border/50">
+                     <p className="text-xs font-medium text-muted-foreground">Orijinal Sorgu:</p>
+                     <p className="text-xs text-muted-foreground whitespace-pre-wrap">{turkishEquivalent}</p>
+                 </div>
             )}
           </>
         ) : (
